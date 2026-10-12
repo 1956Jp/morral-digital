@@ -20,6 +20,7 @@ Casi todo se cambia en **`assets/js/config.js`**; `index.html`, `app.js` y `styl
 - **Datos de cobro** → `pago` (PayPal, Pago Móvil, Binance, WhatsApp, tasa de respaldo).
 - **Libros** → `assets/js/data.js` + `books/MANIFIESTO.md` (ver «Añadir un libro» en `AGENTS.md`).
 - **Funciones nuevas** → añade el código en `assets/js/app.js`; los textos/etiquetas que uses, léelos de `CFG`.
+- **Al cambiar CSS/JS**, sube el número de versión en `index.html` (`assets/...?v=3`) para evitar cachés del navegador.
 
 ## Previsualizar en local
 ```bash
