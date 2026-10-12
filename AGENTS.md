@@ -11,7 +11,16 @@ node --check assets/js/*.js     # única comprobación automatizable
 Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de descarga, pestaña **Pago Móvil** (datos, monto en Bs, copiar, WhatsApp), libros de enlace gratuito y formulario de reseñas.
 
 ## Estructura que no se ve en los nombres
-- `index.html` carga `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `B` (catálogo) se define en `data.js` y lo consume `app.js`.
+- `index.html` carga `assets/js/config.js`, luego `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `CFG` (config) se define en `config.js`, `B` (catálogo) en `data.js`, y `app.js` los consume.
+
+## Configuración y extensión (`assets/js/config.js`)
+Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en `app.js` si falta el archivo). Editar aquí antes de tocar `app.js`:
+- `marca` / `textos` → título, hero, catálogo, reseñas, expansión, footer y etiquetas de botones (`botonComprar`, `botonGratis`, `etiquetaMorral`).
+- `colores` → se vuelcan a variables CSS (`--bg`, `--card`, `--ink`, `--mut`, `--red`, `--gold`, `--green`, `--line`); valor vacío = usa el CSS.
+- `secciones` (vistas: `catalogo`/`resenas`/`expansion`) y `nav` (etiquetas del menú).
+- `metodosPago` (orden y visibilidad de las pestañas de pago) y `etiquetasPago`.
+- `pago` → `paypal`, `zinli`, `whatsapp`, `vesRate`, `pagomovil{...}`, `binance{...}`.
+`app.js` los aplica en `hydrate()` (textos), `applyTheme()` (colores) y `toggleSections()` (vistas), invocadas al cargar. Las pestañas salen de `METODOS` (derivado de `CFG.metodosPago`) y `checkout()` abre la primera. Para **añadir vistas/funciones nuevas** se edita `index.html`/`app.js`; para **libros**, solo `data.js` + `MANIFIESTO.md`.
 - Desplegado como sitio de proyecto en `/morral-digital/`: **todas las rutas deben ser relativas** (hoy hay 0 rutas raíz `/assets/...`). Mantener `.nojekyll`.
 - `books/MANIFIESTO.md` es el registro de dominio público: fuente, licencia y fecha de verificación por título. Nada se publica sin su fila ahí.
 
@@ -31,7 +40,7 @@ Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de de
 4. Fuentes bloqueadas: INEHRM, CLACSO y Radio Zapatista (NC), Ocean Press (Che), copias tipo Z-Library. Autores fuera: Fidel Castro, Ho Chi Minh, Che Guevara, Hugo Chávez.
 
 ## Pago Móvil (cobro manual, sin backend)
-- Config en `assets/js/app.js`: `PAGOMOVIL` (banco/código/teléfono/cédula/titular), `WHATSAPP` (internacional, sin `0`), `VES_RATE` (respaldo si fallan las APIs), `QR_PM` (imagen opcional, se oculta con `onerror`).
+- Config en `assets/js/config.js` → `pago`: `pagomovil` (banco/código/teléfono/cédula/titular/qr), `whatsapp` (internacional, sin `0`), `vesRate` (respaldo si fallan las APIs). En `app.js` se leen como `PAGOMOVIL`, `WHATSAPP`, `VES_RATE`, `QR_PM` (con respaldo por defecto).
 - La tasa USD→VES es la **oficial del BCV**, obtenida en `getRate()` con `fetch` a DolarApi (`ve.dolarapi.com/v1/dolares/oficial`, y como respaldo el listado `/v1/dolares` filtrando `fuente=="oficial"`); si fallan, usa `VES_RATE` o muestra «tasa no disponible». Se cachea en `rateCache`.
 - Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. El resto (carrito, reseñas) sigue solo en memoria.
 - `orderCode` se genera una vez en `checkout()` (`newOrder()`), para que el concepto no cambie al alternar pestañas.
@@ -44,5 +53,6 @@ Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de de
 - El pago es una demo deliberada salvo **Pago Móvil** (cobro manual): `done()` inventa/usa el pedido y luego sirve los PDF de `books/`, que son públicos y accesibles sin pagar. Para cobro automático real hay que sustituir `done()` por Stripe/PayPal/MercadoPago con backend (lo documenta README).
 - Modo oscuro solo por CSS (`prefers-color-scheme` + `:root[data-theme="dark"]` en `styles.css`); no hay interruptor.
 - Copia de interfaz en español.
-- Pagos: pestañas en `method()` (`app.js`): tarjeta/Zinli (demo, inputs decorativos), PayPal (`PAYPAL_USER` → `https://paypal.me/{user}/{importe}USD`), **Pago Móvil** (real, manual) y **Cripto** (pendiente, aún no implementado). `ZINLI_USER` (vacío) solo añade el teléfono a la nota de «Pide y Recibe» si se rellena. Sin backend no hay verificación automática del cobro.
+- Pagos: pestañas en `method()` (`app.js`), orden/visibilidad desde `CFG.metodosPago`: tarjeta/Zinli (demo, inputs decorativos), PayPal (`pago.paypal` → `https://paypal.me/{user}/{importe}USD`), **Pago Móvil** (real, manual) y **Cripto** (Binance Pay, manual: `pago.binance` con `id`/`email`/`tlf` públicos; NUNCA incluir claves privadas ni 2FA). `pago.zinli` (vacío) solo añade el teléfono a la nota de «Pide y Recibe» si se rellena. Sin backend no hay verificación automática del cobro.
+- El botón de compra muestra **"COMPRAR"** (`title="Añadir al morral"` conserva el símil del morral); `add()` sigue metiendo el libro en el morral.
 - Los dos PDF con edición en copyright (Alianza y Biblioteca Ayacucho) están fuera de `books/`, en `../_descartados-morral/`; no volver a enlazarlos.
