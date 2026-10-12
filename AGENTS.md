@@ -1,13 +1,14 @@
 # AGENTS.md
 
-Estático de GitHub Pages: `index.html` + CSS + JS vanila. **No hay package.json, build, tests, lint ni git** — no inventes comandos de npm/CI ni intentes `git status`; verificación = servir y abrir la página.
+Estático de GitHub Pages: `index.html` + CSS + JS vanila. **No hay package.json, build, tests ni lint** — no inventes comandos de npm/CI; verificación = servir y abrir la página. (Sí es un repo git; commit/push solo si se pide.)
 
 ## Previsualización
 ```bash
+./servir.sh                    # red local con prefijo de proyecto → http://IP:8000/morral-digital/
 python3 -m http.server 8000    # desde la raíz del repo → http://localhost:8000
 node --check assets/js/*.js     # única comprobación automatizable
 ```
-Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de descarga, libros de enlace gratuito y formulario de reseñas.
+Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de descarga, pestaña **Pago Móvil** (datos, monto en Bs, copiar, WhatsApp), libros de enlace gratuito y formulario de reseñas.
 
 ## Estructura que no se ve en los nombres
 - `index.html` carga `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `B` (catálogo) se define en `data.js` y lo consume `app.js`.
@@ -29,11 +30,19 @@ Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de de
 3. Registrar la fila en `books/MANIFIESTO.md` (URL de origen, licencia, fecha).
 4. Fuentes bloqueadas: INEHRM, CLACSO y Radio Zapatista (NC), Ocean Press (Che), copias tipo Z-Library. Autores fuera: Fidel Castro, Ho Chi Minh, Che Guevara, Hugo Chávez.
 
+## Pago Móvil (cobro manual, sin backend)
+- Config en `assets/js/app.js`: `PAGOMOVIL` (banco/código/teléfono/cédula/titular), `WHATSAPP` (internacional, sin `0`), `VES_RATE` (respaldo si fallan las APIs), `QR_PM` (imagen opcional, se oculta con `onerror`).
+- La tasa USD→VES es la **oficial del BCV**, obtenida en `getRate()` con `fetch` a DolarApi (`ve.dolarapi.com/v1/dolares/oficial`, y como respaldo el listado `/v1/dolares` filtrando `fuente=="oficial"`); si fallan, usa `VES_RATE` o muestra «tasa no disponible». Se cachea en `rateCache`.
+- Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. El resto (carrito, reseñas) sigue solo en memoria.
+- `orderCode` se genera una vez en `checkout()` (`newOrder()`), para que el concepto no cambie al alternar pestañas.
+- `method("bank")` pinta datos + monto en Bs + concepto + botones copiar (`copyText`) + botón WhatsApp; llama a `fillBank()` para rellenar la tasa/monto/`href` de forma asíncrona. `done()` con `lastMethod=="bank"` muestra el pedido **pendiente de verificación** y **no** ofrece descargas.
+- Los PDF siguen siendo públicos por URL: la «verificación» es por honor hasta tener backend.
+
 ## Gotchas
 - El morral guarda **índices de `B`** (`add(i)`/`rm(i)`), no identificadores: insertar filas en medio recoloca los carritos activos.
-- Carrito y reseñas solo en memoria (sin `localStorage` ni `fetch`); se borran al recargar. No persistir salvo que se pida.
-- El pago es una demo deliberada: `done()` inventa el pedido y luego sirve los PDF de `books/`, que son públicos y accesibles sin pagar. Para cobro real hay que sustituir `done()` por Stripe/PayPal/MercadoPago con backend (lo documenta README).
+- Carrito y reseñas solo en memoria (sin `localStorage`); se borran al recargar. No persistir salvo que se pida. Única llamada de red: `getRate()` para la tasa del Pago Móvil (ver arriba).
+- El pago es una demo deliberada salvo **Pago Móvil** (cobro manual): `done()` inventa/usa el pedido y luego sirve los PDF de `books/`, que son públicos y accesibles sin pagar. Para cobro automático real hay que sustituir `done()` por Stripe/PayPal/MercadoPago con backend (lo documenta README).
 - Modo oscuro solo por CSS (`prefers-color-scheme` + `:root[data-theme="dark"]` en `styles.css`); no hay interruptor.
 - Copia de interfaz en español.
-- Pagos: la pestaña PayPal enlaza a `https://paypal.me/{PAYPAL_USER}` (constante `PAYPAL_USER` en `app.js`, hoy `morraldigital`). No hay verificación del cobro: sin backend los PDF quedan accesibles tras "Ya pagué".
+- Pagos: pestañas en `method()` (`app.js`): tarjeta/Zinli (demo, inputs decorativos), PayPal (`PAYPAL_USER` → `https://paypal.me/{user}/{importe}USD`), **Pago Móvil** (real, manual) y **Cripto** (pendiente, aún no implementado). `ZINLI_USER` (vacío) solo añade el teléfono a la nota de «Pide y Recibe» si se rellena. Sin backend no hay verificación automática del cobro.
 - Los dos PDF con edición en copyright (Alianza y Biblioteca Ayacucho) están fuera de `books/`, en `../_descartados-morral/`; no volver a enlazarlos.

@@ -39,3 +39,10 @@ footer{background:#17302d;color:#d8ece5;padding:30px 0;font-size:14px;text-align
 input,select{width:100%;padding:10px;margin:4px 0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:16px Lora,serif}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .note{font-size:13px;color:var(--mut);background:var(--card);padding:10px;border-radius:6px;border:1px solid var(--line)}
+.pm-data{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.pm-row{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:15px}
+.pm-row span{color:var(--mut);flex:0 0 82px}
+.pm-row b{flex:1;word-break:break-word}
+.btn.cpy{padding:4px 10px;font-size:12px;line-height:1}
+.btn.wa{background:#25d366;color:#08301a;font-weight:700;margin-top:10px}
+.pm-qr{display:block;margin:10px auto;max-width:190px;width:100%;border-radius:8px;border:1px solid var(--line);background:#fff;padding:8px}
