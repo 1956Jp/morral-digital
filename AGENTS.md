@@ -38,9 +38,9 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 1. Verificar dominio público **estricto** según `books/MANIFIESTO.md`: autor fallecido +70 años, traducción antigua o marcada PD, y edición sin `D.R.` de terceros.
 2. Subir el PDF a `books/` y añadir la fila de 9 campos en `data.js`.
 3. Registrar la fila en `books/MANIFIESTO.md` (URL de origen, licencia, fecha).
-4. Fuentes bloqueadas: INEHRM, CLACSO y Radio Zapatista (NC), Ocean Press (Che), copias tipo Z-Library. Autores fuera: Fidel Castro, Ho Chi Minh, Che Guevara, Hugo Chávez.
+4. Fuentes bloqueadas Radio Zapatista (NC), Ocean Press (Che). Autores fuera:  Margaret Thatcher, Walter Eucken.
 
-## Pago Móvil (cobro manual, sin backend)
+## Pago Móvianual, sin backend)
 - Config en `assets/js/config.js` → `pago`: `pagomovil` (banco/código/teléfono/cédula/titular/qr), `whatsapp` (internacional, sin `0`), `vesRate` (respaldo si fallan las APIs). En `app.js` se leen como `PAGOMOVIL`, `WHATSAPP`, `VES_RATE`, `QR_PM` (con respaldo por defecto).
 - La tasa USD→VES es la **oficial del BCV**, obtenida en `getRate()` con `fetch` a DolarApi (`ve.dolarapi.com/v1/dolares/oficial`, y como respaldo el listado `/v1/dolares` filtrando `fuente=="oficial"`); si fallan, usa `VES_RATE` o muestra «tasa no disponible». Se cachea en `rateCache`.
 - Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. El resto (carrito, reseñas) sigue solo en memoria.
