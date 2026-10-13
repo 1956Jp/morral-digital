@@ -1,0 +1,8 @@
+---
+description: Reglas del proyecto El Morral Digital (sitio estático de GitHub Pages)
+alwaysApply: true
+---
+
+La fuente única de instrucciones es **`AGENTS.md`** en la raíz. Léelo antes de tocar el proyecto.
+
+Resumen mínimo: sitio estático (`index.html` + CSS + JS vanila, sin `package.json`/build/tests/lint). Catálogo en `assets/js/data.js` (filas posicionales de 9 campos); lógica en `assets/js/app.js`; registro de dominio público obligatorio en `books/MANIFIESTO.md`. Verificación: `python3 -m http.server 8000` + `node --check assets/js/*.js`. No dupliques reglas aquí: edita `AGENTS.md`.

@@ -43,10 +43,23 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 | Manifiesto del Partido Comunista | Marx / Engels | 1883 / 1895 | 1953 / 1965 | Marxista | — | Alianza Editorial, trad. Pedro Ribas (© 2001/2019) | texto PD / **traducción ©** | 2026-10-09: **no publicada** (traducción en copyright) |
 | Ariel | José Enrique Rodó | 1917 | 1987 | Latinoamericano | `ariel.pdf` | archive.org/details/arielrod00roduoft — Houghton Mifflin, 1922 (trad. F. J. Stimson, †1943) | Dominio público | 2026-10-09 |
 | Facundo | Domingo F. Sarmiento | 1888 | 1958 | Latinoamericano | `facundo.pdf` | archive.org/details/facundos00sarmuoft — Biblioteca Argentina / La Facultad, 1921 | Dominio público | 2026-10-09 |
+| El porvenir de la América Latina | Manuel Ugarte | 1951 | 2021 | Antiimperialista | `ugarte-el-porvenir.pdf` | F. Sempere y Cía., Valencia (pre-1930); espejo siese.org | Dominio público | 2026-10-12 |
+| La República Argentina y el caso de Venezuela | Luis María Drago | 1921 | 1991 | Antiimperialista | `drago-caso-venezuela.pdf` | bibliotecadigital.gob.ar/items/show/847 — ed. 1903 (Coni Hermanos, Buenos Aires) | Dominio público | 2026-10-12 |
+| Noli me tángere | José Rizal | 1896 | 1966 | Antiimperialista | `noli-me-tangere.epub` | gutenberg.org/ebooks/47584 — ed. con notas de R. Sempau (†1909) | Dominio público | 2026-10-12 |
+| El Filibusterismo | José Rizal | 1896 | 1966 | Antiimperialista | `el-filibusterismo.epub` | gutenberg.org/ebooks/30903 | Dominio público | 2026-10-12 |
+| Manifiesto de Cartagena | Simón Bolívar | 1830 | 1901 | Bolivariano | — (enlace) | es.wikisource.org/wiki/Manifiesto_de_Cartagena | Dominio público | 2026-10-12 |
+| Ismaelillo | José Martí | 1895 | 1965 | Martiano | — (enlace) | es.wikisource.org/wiki/Ismaelillo | Dominio público | 2026-10-12 |
+| El presidio político en Cuba | José Martí | 1895 | 1965 | Martiano | — (enlace) | es.wikisource.org/wiki/El_presidio_político_en_Cuba | Dominio público | 2026-10-12 |
+| Respuesta a Sor Filotea de la Cruz | Sor Juana Inés de la Cruz | 1695 | 1765 | Latinoamericano | — (enlace) | marxists.org/espanol/tematica/mujer/autores/sorjuana | Dominio público | 2026-10-12 |
+| Siete ensayos de interpretación de la realidad peruana | José Carlos Mariátegui | 1930 | 2000 | Marxista | — (enlace) | marxists.org/espanol/mariateg/1928/7ensayos | Dominio público | 2026-10-12 |
 
-> Fuente y edición verificadas para **Ariel** y **Facundo** (ya publicados en
-> `books/`). Las filas de Bolívar, Rodríguez y Lenin siguen **pendientes** de
-> fuente y comprobación antes de subir archivo.
+> Archivos hospedados y verificados en `books/`: **Ariel**, **Facundo**,
+> **El porvenir de la América Latina** (Sempere, pre-1930), **La República
+> Argentina y el caso de Venezuela** (ed. 1903), **Noli me tángere** y **El
+> Filibusterismo** (Gutenberg, notas de Sempau †1909). Las filas de Bolívar,
+> Rodríguez y Lenin siguen **pendientes** de fuente y comprobación antes de
+> subir archivo. Las fichas marcadas «— (enlace)» se publican con `precio = 0`
+> (botón "Leer gratis") porque no se aloja PDF local.
 
 ## Ediciones descartadas (copyright de la edición o la traducción)
 
@@ -57,6 +70,7 @@ quedan **fuera** de `books/` y no se enlazan:
 |---|---|---|
 | Nuestra América | Biblioteca Ayacucho (PDF de 2006) | Prólogo y aparato crítico modernos con copyright propio. El texto de Martí es PD. |
 | Manifiesto del Partido Comunista | Alianza Editorial, trad. Pedro Ribas (2001/2019) | Reza «Reservados todos los derechos»: la traducción sigue en copyright vivo. |
+| Siete ensayos de interpretación de la realidad peruana | archive.org `mariategui-...-1928` (PDF «Edición digital epublibre 2016») | El texto de 1928 es PD, pero el PDF es una edición digital epublibre/epublibre 2016 con cubierta y editor ©; se descarta y se enlaza el texto MIA. |
 
 ## Candidatos pendientes de búsqueda (19)
 

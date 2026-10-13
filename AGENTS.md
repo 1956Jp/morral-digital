@@ -29,8 +29,8 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 9 campos por fila, **array posicional, sin id**:
 `[0 título, 1 autor, 2 corriente, 3 precio USD, 4 color, 5 descripción, 6 archivo, 7 fuenteURL, 8 licencia]`
 - `2 corriente` debe ser clave del mapa `IC` de `app.js` o el icono sale `undefined`: `Bolivariano`, `Antiimperialista`, `Latinoamericano`, `Martiano`, `Zapatista`, `Marxista`.
-- Los chips de filtro salen de los datos: **una corriente sin libros desaparece del filtro** (hoy `Antiimperialista` está vacío y por eso no se ve).
-- `3 precio = 0` → enlace gratuito, no se vende: la ficha muestra "Leer gratis" apuntando al campo 7 y `add()` lo rechaza. Reservado a textos del EZLN (copyright vivo / CC BY-NC-SA).
+- Los chips de filtro salen de los datos: **una corriente sin libros desaparece del filtro** (hoy las 6 tienen contenido).
+- `3 precio = 0` → enlace gratuito, no se vende: la ficha muestra "Leer gratis" apuntando al campo 7 y `add()` lo rechaza. Se usa para textos del EZLN (copyright vivo / CC BY-NC-SA) y para obras de dominio público que solo se enlazan sin PDF local (Wikisource, marxists.org).
 - `6 archivo` = nombre dentro de `books/` (sin ruta); si está, `done()` pinta `<a download>` en la confirmación del pedido.
 - `8 licencia` alimenta el sello de la ficha (`★ {licencia} · {corriente}`); vacío → "Dominio público".
 
