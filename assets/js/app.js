@@ -73,6 +73,51 @@ p_monto_bs:esBanco&&info?+toBs(usd,info.rate).toFixed(2):null,
 p_tasa_bs:esBanco&&info?+info.rate.toFixed(4):null,
 p_items:Object.values(grupos)};
 try{await fetch(`${SB_URL}/rest/v1/rpc/registrar_pedido`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(row)})}catch(e){}}
+// ==== Supabase: catálogo, reseñas y actividad por sección ====
+// Mismo estilo que saveOrder (REST/PostgREST, sin librerías). Todo es
+// best-effort: si no hay config o la red falla, el sitio usa los datos
+// locales (data.js y las reseñas de ejemplo) y sigue funcionando.
+async function sbGet(path){
+const r=await fetch(`${SB_URL}/rest/v1/${path}`,{headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`}});
+if(!r.ok)throw new Error("supabase "+r.status);
+return r.json()}
+async function sbInsert(table,row){
+const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(row)});
+if(!r.ok)throw new Error("supabase "+r.status);
+return true}
+// Catálogo: si Supabase tiene filas activas, sustituye las de data.js
+// (que queda como respaldo/semilla). Mantiene el array posicional de 9
+// campos que usan draw(), add() y done().
+async function loadBooks(){
+if(!SB_ON)return;
+try{
+const rows=await sbGet("books?select=title,author,corriente,price,color,description,file,source_url,license&active=eq.true&order=sort_order.asc");
+if(!Array.isArray(rows)||!rows.length)return;
+const mapped=rows.map(r=>[r.title,r.author,r.corriente,+r.price||0,r.color||"#2f6fb0",r.description||"",r.file||"",r.source_url||"",r.license||""]);
+B.length=0;mapped.forEach(x=>B.push(x));
+cat="Todos";draw();upd();
+}catch(e){}}
+// Reseñas: lee las aprobadas y reemplaza los ejemplos del HTML.
+async function loadRevs(){
+if(!SB_ON)return;
+const cont=document.querySelector(".rev");if(!cont)return;
+try{
+const rows=await sbGet("reviews?select=name,rating,comment&status=eq.approved&order=created_at.desc&limit=30");
+if(!Array.isArray(rows)||!rows.length)return;
+cont.innerHTML=rows.map(r=>{const s=Math.min(5,Math.max(1,Math.round(+r.rating||5)));
+return `<div class="q"><span class="stars">${"★".repeat(s)}${"☆".repeat(5-s)}</span><br>“${esc(r.comment)}” <br><small>— ${esc(r.name)}</small></div>`}).join("");
+}catch(e){}}
+// Actividad por sección: `click` en el menú y `view` al entrar en
+// pantalla (una vez por carga). Solo se registra si hay Supabase.
+function logSection(seccion,evento){
+if(!SB_ON)return;
+sbInsert("section_events",{section:seccion,event:evento}).catch(()=>{})}
+function observeSections(){
+["catalogo","resenas","expansion"].forEach(k=>{const a=document.getElementById("nav-"+k);if(a)a.addEventListener("click",()=>logSection(k,"click"))});
+if(typeof IntersectionObserver==="undefined")return;
+const visto={};
+const io=new IntersectionObserver(es=>{es.forEach(en=>{const k=en.target.id;if(en.isIntersecting&&!visto[k]){visto[k]=1;logSection(k,"view");io.unobserve(en.target)}})},{threshold:.35});
+["catalogo","resenas","expansion"].forEach(k=>{const s=document.getElementById(k);if(s)io.observe(s)})}
 // ==== Hidratación desde config.js: textos, colores y secciones visibles ====
 function applyTheme(){const c=CFG.colores||{},map={bg:"--bg",card:"--card",ink:"--ink",mut:"--mut",red:"--red",gold:"--gold",green:"--green",line:"--line"};for(const k in map){if(c[k])document.documentElement.style.setProperty(map[k],c[k])}}
 function toggleSections(){const s=CFG.secciones||{};["catalogo","resenas","expansion"].forEach(k=>{const sec=document.getElementById(k);if(sec)sec.style.display=(s[k]===false)?"none":""})}
@@ -138,7 +183,12 @@ return}
 const d=cart.map(i=>B[i][6]?`<div class="item"><a href="books/${B[i][6]}" download>${B[i][0]}</a></div>`:`<div class="item"><span>${B[i][0]}</span><small> en preparación</small></div>`).join("");
 $("pm").innerHTML=`<h2>¡Gracias, compañero/a!</h2><p>Pedido <b>${n}</b> confirmado. Enviaremos tus libros a <b>${em}</b>.</p>${lastMethod=="paypal"?`<p class="note">El pago con PayPal no se verifica automáticamente en un sitio estático; si hubo algún problema, escríbenos.</p>`:lastMethod=="zinli"?`<p class="note">El pago con Zinli es una demo: recibe el importe por «Pide y Recibe» y confirma aquí el pedido. El archivo queda descargable igualmente.</p>`:""}${d?`<p class="sub">Tus descargas:</p>${d}`:""}<button class="btn" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`}
 function addRev(e){e.preventDefault();const n=+$("rs").value;const s=Number.isFinite(n)?Math.min(5,Math.max(1,Math.round(n))):5;
-const d=document.createElement("div");d.className="q";d.innerHTML=`<span class="stars">${"★".repeat(s)}${"☆".repeat(5-s)}</span><br>`;
-const p=document.createElement("span");p.textContent=`“${$("rt").value}” — ${$("rn").value}`;d.appendChild(p);
-document.querySelector(".rev").prepend(d);e.target.reset()}
-hydrate();draw();upd();
+const nombre=$("rn").value,comentario=$("rt").value;
+if(SB_ON){sbInsert("reviews",{name:nombre,rating:s,comment:comentario,status:"pending"}).then(()=>prependRev(s,comentario,nombre,true)).catch(()=>prependRev(s,comentario,nombre,false));e.target.reset();return}
+prependRev(s,comentario,nombre,false);e.target.reset()}
+function prependRev(s,comentario,nombre,enviada){
+const d=document.createElement("div");d.className="q";
+d.innerHTML=`<span class="stars">${"★".repeat(s)}${"☆".repeat(5-s)}</span><br>`;
+const p=document.createElement("span");p.textContent=`“${comentario}” — ${nombre}`+(enviada?" (pendiente de moderación)":"");
+d.appendChild(p);document.querySelector(".rev").prepend(d)}
+hydrate();draw();upd();loadBooks();loadRevs();observeSections();

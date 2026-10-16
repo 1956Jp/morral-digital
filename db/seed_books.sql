@@ -1,0 +1,68 @@
+-- =====================================================================
+--  EL MORRAL DIGITAL — Catálogo inicial (seed de `books`)
+--  ---------------------------------------------------------------------
+--  Ejecuta ANTES db/supabase_secciones.sql. Copia el catálogo de
+--  assets/js/data.js. `sort_order` conserva el orden original.
+--  Reejecutable: actualiza los campos si el título ya existe.
+--
+--  Recuerda: solo dominio público estricto, verificado en
+--  books/MANIFIESTO.md. Si editas el catálogo en Supabase, mantén
+--  data.js como respaldo (el sitio lo usa si Supabase falla).
+-- =====================================================================
+
+insert into public.books
+  (title, author, corriente, price, color, description, file, source_url, license, sort_order, active)
+values
+  ('Ariel', 'José Enrique Rodó', 'Latinoamericano', 2, '#2f6fb0',
+   'Defensa de la identidad cultural latinoamericana (1900).',
+   'ariel.pdf', 'https://archive.org/details/arielrod00roduoft', 'Dominio público', 0, true),
+  ('Primera Declaración de la Selva Lacandona', 'EZLN', 'Zapatista', 0, '#7a4a2f',
+   'Comunicado fundacional del EZLN (1994). Texto original, sin venta: solo enlace.',
+   '', 'https://enlacezapatista.ezln.org.mx/1994/01/01/primera-declaracion-de-la-selva-lacandona', 'Enlace libre (copyright EZLN)', 1, true),
+  ('Al pueblo de México: las demandas del EZLN', 'EZLN', 'Zapatista', 0, '#8a5a3f',
+   'Pliego de demandas del levantamiento de 1994. Texto original, sin venta: solo enlace.',
+   '', 'https://enlacezapatista.ezln.org.mx/1994/03/01/al-pueblo-de-mexico-las-demandas-del-ezln', 'Enlace libre (copyright EZLN)', 2, true),
+  ('La palabra del EZLN (archivo de comunicados)', 'EZLN', 'Zapatista', 0, '#5a3a2f',
+   'Archivo de comunicados desde 2011. Radio Zapatista publica bajo CC BY-NC-SA: enlace gratuito.',
+   '', 'https://radiozapatista.org/?page_id=3365', 'Enlace libre (CC BY-NC-SA)', 3, true),
+  ('Facundo', 'Domingo F. Sarmiento', 'Latinoamericano', 2, '#35608f',
+   'Civilización o barbarie: radiografía de la Argentina del siglo XIX y del caudillismo (1845).',
+   'facundo.pdf', 'https://archive.org/details/facundos00sarmuoft', 'Dominio público', 4, true),
+  ('El porvenir de la América Latina', 'Manuel Ugarte', 'Antiimperialista', 2, '#8a2f2f',
+   'Denuncia del imperialismo en América y apuesta por la unidad latinoamericana (1910).',
+   'ugarte-el-porvenir.pdf', 'https://www.siese.org/modulos/manuel_ugarte/elporvenir.pdf', 'Dominio público', 5, true),
+  ('La República Argentina y el caso de Venezuela', 'Luis María Drago', 'Antiimperialista', 2, '#a33b2b',
+   'Origen de la Doctrina Drago: rechazo al cobro de deudas con la fuerza (1903).',
+   'drago-caso-venezuela.pdf', 'http://www.bibliotecadigital.gob.ar/items/show/847', 'Dominio público', 6, true),
+  ('Noli me tángere', 'José Rizal', 'Antiimperialista', 2, '#7a2e46',
+   'Novela anticolonial filipina contra el dominio español (1887).',
+   'noli-me-tangere.epub', 'https://www.gutenberg.org/ebooks/47584', 'Dominio público', 7, true),
+  ('El Filibusterismo', 'José Rizal', 'Antiimperialista', 2, '#6d2440',
+   'Continuación de Noli: la denuncia del despotismo colonial (1891).',
+   'el-filibusterismo.epub', 'https://www.gutenberg.org/ebooks/30903', 'Dominio público', 8, true),
+  ('Manifiesto de Cartagena', 'Simón Bolívar', 'Bolivariano', 0, '#1f6f8c',
+   'Primera memoria de Bolívar: causas de la caída de la república (1812). Texto libre.',
+   '', 'https://es.wikisource.org/wiki/Manifiesto_de_Cartagena', 'Dominio público', 9, true),
+  ('Ismaelillo', 'José Martí', 'Martiano', 0, '#245a86',
+   'Poemario de Martí para su hijo, ruptura de la métrica tradicional (1882). Texto libre.',
+   '', 'https://es.wikisource.org/wiki/Ismaelillo', 'Dominio público', 10, true),
+  ('El presidio político en Cuba', 'José Martí', 'Martiano', 0, '#33508a',
+   'Testimonio de Martí sobre la prisión y el trabajo forzado (1871). Texto libre.',
+   '', 'https://es.wikisource.org/wiki/El_presidio_pol%C3%ADtico_en_Cuba', 'Dominio público', 11, true),
+  ('Respuesta a Sor Filotea de la Cruz', 'Sor Juana Inés de la Cruz', 'Latinoamericano', 0, '#6b4a8a',
+   'Defensa de la educación y el pensamiento de la mujer (1691). Texto libre.',
+   '', 'https://www.marxists.org/espanol/tematica/mujer/autores/sorjuana/1692/marzo01.htm', 'Dominio público', 12, true),
+  ('Siete ensayos de interpretación de la realidad peruana', 'José Carlos Mariátegui', 'Marxista', 0, '#146c60',
+   'Análisis del colonialismo, el latifundio y el socialismo peruano (1928). Texto libre.',
+   '', 'https://www.marxists.org/espanol/mariateg/1928/7ensayos/index.htm', 'Dominio público', 13, true)
+on conflict (title) do update set
+  author = excluded.author,
+  corriente = excluded.corriente,
+  price = excluded.price,
+  color = excluded.color,
+  description = excluded.description,
+  file = excluded.file,
+  source_url = excluded.source_url,
+  license = excluded.license,
+  sort_order = excluded.sort_order,
+  active = excluded.active;

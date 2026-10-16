@@ -31,7 +31,7 @@ window.CFG = {
     catalogoSub: "Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario de $2 USD (Ariel, Facundo, El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo); los demás son enlaces gratuitos a su fuente original.",
     catalogoNota: "Nota editorial: solo publicamos obras de dominio público estricto, con archivo y fuente verificados en books/MANIFIESTO.md. Todo título sin archivo y sin fuente comprobable queda retirado del catálogo. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).",
     resenasTitulo: "Voces del morral",
-    resenasSub: "Reseñas de ejemplo · el formulario es local y no se envía a ningún servidor",
+    resenasSub: "Reseñas de lectores · las nuevas se revisan antes de publicarse",
     expansionTitulo: "Hoja de ruta",
     expansionSub: "Así crecerá el Morral",
     morralTitulo: "Tu morral",
@@ -82,13 +82,14 @@ window.CFG = {
     }
   },
 
-  // ------------------------------------------------ Pedidos (Supabase)
-  // Registro opcional de pedidos. Si `url` o `anonKey` quedan vacíos, se
-  // desactiva y el sitio funciona igual. Ejecuta antes el SQL de
-  // `db/supabase_pedidos.sql` (tablas `orders`/`order_items` + función rpc
-  // `registrar_pedido`). La `anonKey` es PÚBLICA (va en el navegador): la
-  // protección es la política RLS de solo-INSERT. NUNCA pongas aquí la
-  // `service_role` ni ninguna clave privada.
+  // ------------------------------------------------ Secciones (Supabase)
+  // Registro opcional de pedidos, catálogo, reseñas y actividad por sección.
+  // Si `url` o `anonKey` quedan vacíos, se desactiva y el sitio usa los
+  // datos locales (data.js y las reseñas de ejemplo). Ejecuta antes el SQL
+  // de `db/supabase_pedidos.sql` (pedidos) y `db/supabase_secciones.sql`
+  // (books/reviews/section_events); luego carga `db/seed_books.sql`.
+  // La `anonKey` es PÚBLICA (va en el navegador): la protección es la
+  // política RLS. NUNCA pongas aquí la `service_role` ni ninguna clave privada.
   supabase: {
     url: "",            // https://TU-PROYECTO.supabase.co
     anonKey: ""         // clave anónima pública (NO la service_role)

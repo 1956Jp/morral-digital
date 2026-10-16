@@ -11,6 +11,8 @@ Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, ant
 - `books/` – archivos PDF/EPUB
 - `books/MANIFIESTO.md` – registro de dominio público (fuente, licencia, verificación)
 - `db/supabase_pedidos.sql` – esquema SQL para registrar pedidos en Supabase (opcional)
+- `db/supabase_secciones.sql` – esquema SQL para catálogo, reseñas y actividad por sección (opcional)
+- `db/seed_books.sql` – catálogo inicial para la tabla `books` (opcional)
 
 ## Personalizar (sin tocar el código)
 Casi todo se cambia en **`assets/js/config.js`**; `index.html`, `app.js` y `styles.css` solo si añades funciones nuevas.
@@ -70,6 +72,20 @@ Al confirmar un pedido (`done()` en `app.js`), el sitio lo registra en [Supabase
 3. Cada pedido entra como `pending_review` (el sitio no verifica cobros) con su correo, método de pago y líneas; en Pago Móvil guarda además `monto_bs`/`tasa_bs` con la tasa BCV del momento. Consúltalos en el **Table Editor** de Supabase (o con la `service_role` desde el servidor) y márcalos `paid` cuando confirmes el comprobante.
 
 Seguridad: la `anonKey` es pública por diseño; la protección es la **RLS de solo-INSERT**, y `registrar_pedido` corre como `SECURITY INVOKER` para que esa RLS siga aplicando. En Vercel, el `connect-src` de `vercel.json` ya incluye `https://*.supabase.co`; en GitHub Pages no hay CSP que ajustar.
+
+## Catálogo, reseñas y actividad con Supabase (opcional)
+Con el **mismo** `supabase` de `config.js` que los pedidos, el sitio puede sincronizar tres secciones. Si `url`/`anonKey` están vacíos, todo usa los datos locales (`data.js` y las reseñas de ejemplo) y el sitio funciona igual.
+
+1. **Ejecuta `db/supabase_secciones.sql`** en el SQL Editor. Crea:
+   - **`books`** — el catálogo. Lectura **pública** de los títulos `active`; nadie desde el navegador puede escribir.
+   - **`reviews`** — reseñas. Cualquiera puede enviar (entra como `pending`); solo se leen las `approved` (apruébalas en el Table Editor).
+   - **`section_events`** — actividad por sección: `view` al entrar en pantalla y `click` al pulsar el menú. Solo INSERT; nadie las lee.
+2. **Carga el catálogo**: ejecuta `db/seed_books.sql` (copia de `data.js`). A partir de ahí edita los libros en el Table Editor; `data.js` queda como **respaldo** y se usa si Supabase falla o no está configurado.
+3. **Mira la actividad** en el Table Editor (`section_events`) o con la `service_role` desde el servidor.
+
+En `app.js`: `loadBooks()` sustituye el array `B` si Supabase devuelve filas; `loadRevs()` pinta las reseñas aprobadas (reemplazan los ejemplos) y `addRev()` envía la nueva como `pending`; `observeSections()` registra `view`/`click`. Son **best-effort**: si algo falla, no rompe la página.
+
+> Al mover el catálogo a Supabase, la lista de libros deja de vivir solo en `data.js` + `books/MANIFIESTO.md`. **Mantén `data.js` y el MANIFIESTO actualizados igualmente**: son el respaldo y el registro de dominio público.
 
 ## Derechos
 Solo se publican obras de **dominio público estricto** (autor fallecido + 70 años, traducción y edición también libres de copyright de terceros). Cada título debe estar registrado en `books/MANIFIESTO.md` con su URL de origen y su licencia antes de publicarse.
