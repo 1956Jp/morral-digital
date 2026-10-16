@@ -19,9 +19,10 @@ const QR_PM=PAGOMOVIL.qr||"";                 // QR opcional del banco
 // Cripto (cobro manual por Binance Pay). Solo identificadores PÚBLICOS; nunca claves privadas.
 const BINANCE=Object.assign({id:"",email:"",tlf:"",qr:""},_pago.binance||{});
 const QR_CRYPTO=BINANCE.qr||"";               // QR opcional de Binance Pay
-// Supabase: registro opcional de pedidos (ver config.js y README). anonKey es PÚBLICA.
+// Supabase: registro opcional de pedidos (ver config.js, db/supabase_pedidos.sql y
+// README). Se llama a la función rpc `registrar_pedido`. anonKey es PÚBLICA.
 const SB=CFG.supabase||{};
-const SB_URL=(SB.url||"").replace(/\/+$/,""),SB_KEY=SB.anonKey||"",SB_TABLA=SB.tabla||"pedidos";
+const SB_URL=(SB.url||"").replace(/\/+$/,""),SB_KEY=SB.anonKey||"";
 const SB_ON=!!(SB_URL&&SB_KEY);
 // Textos y etiquetas editables desde config.js
 const TXT=Object.assign({botonComprar:"COMPRAR",botonGratis:"Leer gratis",etiquetaMorral:"Añadir al morral",morralTitulo:"Tu morral"},_textos);
@@ -59,12 +60,19 @@ const wa=document.getElementById("pm-wa");if(!wa)return;
 wa.href=waLink(`Hola, envío mi comprobante de pago en cripto.\nPedido: ${orderCode}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`)}
 // Registra el pedido en Supabase (REST/PostgREST, sin librerías). Silencioso: si
 // falla o no hay config, no rompe la confirmación. La tabla debe tener RLS de solo-INSERT.
-async function saveOrder(correo,estado){
-if(!SB_ON||!orderCode)return;
-const info=rateCache,usd=total();
-const row={codigo:orderCode,correo:String(correo||""),metodo:lastMethod,libros:cart.map(i=>B[i][0]),total_usd:+usd.toFixed(2),estado,fecha:new Date().toISOString()};
-if(lastMethod=="bank"){row.tasa_bs=info?+info.rate.toFixed(4):null;row.monto_bs=info?+toBs(usd,info.rate).toFixed(2):null}
-try{await fetch(`${SB_URL}/rest/v1/${SB_TABLA}`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(row)})}catch(e){}}
+async function saveOrder(correo){
+if(!SB_ON||!orderCode||!cart.length)return;
+const info=rateCache,usd=total();if(!(usd>0))return;
+// Agrupa el carrito por título (hoy la cantidad es siempre 1) y lo envía
+// como `p_items` a la función rpc `registrar_pedido`.
+const grupos={};
+for(const i of cart){const t=B[i][0];grupos[t]=grupos[t]||{book_title:t,unit_price:+B[i][3].toFixed(2),quantity:0};grupos[t].quantity++}
+const esBanco=lastMethod=="bank";
+const row={p_order_code:orderCode,p_customer_email:String(correo||""),p_payment_method:lastMethod,p_currency:"USD",p_total_amount:+usd.toFixed(2),
+p_monto_bs:esBanco&&info?+toBs(usd,info.rate).toFixed(2):null,
+p_tasa_bs:esBanco&&info?+info.rate.toFixed(4):null,
+p_items:Object.values(grupos)};
+try{await fetch(`${SB_URL}/rest/v1/rpc/registrar_pedido`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(row)})}catch(e){}}
 // ==== Hidratación desde config.js: textos, colores y secciones visibles ====
 function applyTheme(){const c=CFG.colores||{},map={bg:"--bg",card:"--card",ink:"--ink",mut:"--mut",red:"--red",gold:"--gold",green:"--green",line:"--line"};for(const k in map){if(c[k])document.documentElement.style.setProperty(map[k],c[k])}}
 function toggleSections(){const s=CFG.secciones||{};["catalogo","resenas","expansion"].forEach(k=>{const sec=document.getElementById(k);if(sec)sec.style.display=(s[k]===false)?"none":""})}
@@ -90,8 +98,8 @@ function openCart(){closeAll();$("cart").classList.add("show")}
 function closeAll(){["cart","pay"].forEach(x=>$(x).classList.remove("show"))}
 function checkout(){if(!cart.length)return;orderCode=newOrder();closeAll();$("pay").classList.add("show");method(METODOS[0])}
 function method(m){if(!METODOS.includes(m))m=METODOS[0];lastMethod=m;const t=ETIQ;
-const form={card:`<input placeholder="Nombre en la tarjeta"><input placeholder="Número de tarjeta" inputmode="numeric"><div class="row" style="gap:8px"><input placeholder="MM/AA"><input placeholder="CVC"></div>`,
-zinli:`<p>Paga con tu tarjeta virtual Zinli (prepaga, en $USD).</p><input placeholder="Nombre en la tarjeta"><input placeholder="Número de la tarjeta Zinli" inputmode="numeric"><div class="row" style="gap:8px"><input placeholder="MM/AA"><input placeholder="CVC"></div><p class="note">Recibe con tu Zinli desde la app: añade una tarjeta y transfiere el importe al número de «Pide y Recibe»${ZINLI_USER?` (${ZINLI_USER})`:""}.</p>`,
+const form={card:`<input placeholder="Nombre en la tarjeta"><input placeholder="Número de tarjeta" inputmode="numeric"><div class="row" style="gap:8px"><input placeholder="MM/AA"><input placeholder="CVC"></div><p class="note">Demo: no se procesa ningún cobro y estos campos no se envían a ningún servidor. Para pagar de verdad usa <b>Pago Móvil</b> o <b>Cripto</b>.</p>`,
+zinli:`<p>Paga con tu tarjeta virtual Zinli (prepaga, en $USD).</p><input placeholder="Nombre en la tarjeta"><input placeholder="Número de la tarjeta Zinli" inputmode="numeric"><div class="row" style="gap:8px"><input placeholder="MM/AA"><input placeholder="CVC"></div><p class="note">Demo: no se procesa ningún cobro y estos campos no se envían a ningún servidor; el envío se hace desde la app de Zinli, no desde aquí.</p><p class="note">Recibe con tu Zinli desde la app: añade una tarjeta y transfiere el importe al número de «Pide y Recibe»${ZINLI_USER?` (${ZINLI_USER})`:""}.</p>`,
 paypal:`<p>Serás redirigido a PayPal para completar el pago.</p><a class="btn alt" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${paypalLink(total())}" target="_blank" rel="noopener">Pagar ${f(total())} con PayPal</a><p class="note">Al volver de PayPal, pulsa «Ya pagué» para ver tus descargas.</p>`,bank:`<p>Pago Móvil a <b>${PAGOMOVIL.banco}</b> (código ${PAGOMOVIL.codigo}).</p>
 <div class="pm-data">
 <div class="pm-row"><span>Teléfono</span><b>${PAGOMOVIL.telefono}</b><button type="button" class="btn ghost cpy" onclick="copyText('${PAGOMOVIL.telefono}')">Copiar</button></div>
@@ -118,7 +126,7 @@ ${(m=="bank"||m=="crypto")?`<a class="btn wa" id="pm-wa" style="display:block;wi
 if(m=="bank")fillBank();else if(m=="crypto")fillCrypto()}
 function done(){const raw=$("em").value;if(!raw.includes("@")){$("em").focus();return}
 const n=orderCode||newOrder(),em=esc(raw);
-saveOrder(raw,(lastMethod=="bank"||lastMethod=="crypto")?"pendiente":"demo");
+saveOrder(raw);
 if(lastMethod=="bank"){
 const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
 $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;

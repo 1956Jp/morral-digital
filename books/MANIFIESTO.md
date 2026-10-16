@@ -35,12 +35,6 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 
 | Título | Autor | †Año | Plazo (†+70) | Corriente | Archivo | Fuente (URL) | Licencia | Verificado |
 |---|---|---|---|---|---|---|---|---|
-| Carta de Jamaica | Simón Bolívar | 1830 | 1901 | Bolivariano | — | pendiente | Dominio público | pendiente |
-| Discurso de Angostura | Simón Bolívar | 1830 | 1901 | Bolivariano | — | pendiente | Dominio público | pendiente |
-| Inventamos o erramos | Simón Rodríguez | 1854 | 1924 | Bolivariano | — | pendiente | Dominio público | pendiente |
-| Nuestra América | José Martí | 1895 | 1966 | Martiano | — | Biblioteca Ayacucho (ed. 2006, con prólogo y aparato crítico) | texto PD / **edición ©** | 2026-10-09: **no publicada** (edición en copyright) |
-| El imperialismo, fase superior del capitalismo | V. I. Lenin | 1924 | 1994 | Marxista | — | pendiente | Dominio público | pendiente |
-| Manifiesto del Partido Comunista | Marx / Engels | 1883 / 1895 | 1953 / 1965 | Marxista | — | Alianza Editorial, trad. Pedro Ribas (© 2001/2019) | texto PD / **traducción ©** | 2026-10-09: **no publicada** (traducción en copyright) |
 | Ariel | José Enrique Rodó | 1917 | 1987 | Latinoamericano | `ariel.pdf` | archive.org/details/arielrod00roduoft — Houghton Mifflin, 1922 (trad. F. J. Stimson, †1943) | Dominio público | 2026-10-09 |
 | Facundo | Domingo F. Sarmiento | 1888 | 1958 | Latinoamericano | `facundo.pdf` | archive.org/details/facundos00sarmuoft — Biblioteca Argentina / La Facultad, 1921 | Dominio público | 2026-10-09 |
 | El porvenir de la América Latina | Manuel Ugarte | 1951 | 2021 | Antiimperialista | `ugarte-el-porvenir.pdf` | F. Sempere y Cía., Valencia (pre-1930); espejo siese.org | Dominio público | 2026-10-12 |
@@ -53,13 +47,30 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 | Respuesta a Sor Filotea de la Cruz | Sor Juana Inés de la Cruz | 1695 | 1765 | Latinoamericano | — (enlace) | marxists.org/espanol/tematica/mujer/autores/sorjuana | Dominio público | 2026-10-12 |
 | Siete ensayos de interpretación de la realidad peruana | José Carlos Mariátegui | 1930 | 2000 | Marxista | — (enlace) | marxists.org/espanol/mariateg/1928/7ensayos | Dominio público | 2026-10-12 |
 
-> Archivos hospedados y verificados en `books/`: **Ariel**, **Facundo**,
-> **El porvenir de la América Latina** (Sempere, pre-1930), **La República
-> Argentina y el caso de Venezuela** (ed. 1903), **Noli me tángere** y **El
-> Filibusterismo** (Gutenberg, notas de Sempau †1909). Las filas de Bolívar,
-> Rodríguez y Lenin siguen **pendientes** de fuente y comprobación antes de
-> subir archivo. Las fichas marcadas «— (enlace)» se publican con `precio = 0`
-> (botón "Leer gratis") porque no se aloja PDF local.
+> El catálogo publica **14 títulos**: 6 con archivo hospedado y verificado en
+> `books/` (**Ariel**, **Facundo**, **El porvenir de la América Latina** —
+> Sempere, pre-1930 —, **La República Argentina y el caso de Venezuela** —
+> ed. 1903 —, **Noli me tángere** y **El Filibusterismo** — Gutenberg, notas de
+> Sempau †1909 —) y 8 que son solo enlace a su fuente original. Las fichas
+> marcadas «— (enlace)» se publican con `precio = 0` (botón "Leer gratis")
+> porque no se aloja PDF local. Todo título **sin archivo y sin fuente
+> verificable** está retirado del catálogo (ver abajo) hasta que se compruebe
+> una edición de dominio público.
+
+## Retiradas del catálogo (sin archivo y sin fuente verificable)
+
+Estas obras **no están en `data.js`**: o no tiene localizada una edición de
+dominio público comprobable, o la edición/traducción localizada está en
+copyright. Siguen registradas aquí para retomar la búsqueda.
+
+| Título | Autor | Corriente | Motivo |
+|---|---|---|---|
+| Carta de Jamaica | Simón Bolívar | Bolivariano | Sin archivo ni fuente comprobada; candidata a Wikisource/archive.org. |
+| Discurso de Angostura | Simón Bolívar | Bolivariano | Sin archivo ni fuente comprobada; candidata a Wikisource/archive.org. |
+| Inventamos o erramos | Simón Rodríguez | Bolivariano | Sin archivo ni fuente comprobada. |
+| Nuestra América | José Martí | Martiano | Texto PD, pero la edición localizada (Biblioteca Ayacucho, 2006) tiene prólogo/aparato crítico ©; ver «Ediciones descartadas». |
+| El imperialismo, fase superior del capitalismo | V. I. Lenin | Marxista | Sin archivo ni fuente comprobada; candidata a marxists.org. |
+| Manifiesto del Partido Comunista | Marx / Engels | Marxista | Traducción localizada (Alianza, Pedro Ribas) © viva; ver «Ediciones descartadas». |
 
 ## Ediciones descartadas (copyright de la edición o la traducción)
 
@@ -72,10 +83,13 @@ quedan **fuera** de `books/` y no se enlazan:
 | Manifiesto del Partido Comunista | Alianza Editorial, trad. Pedro Ribas (2001/2019) | Reza «Reservados todos los derechos»: la traducción sigue en copyright vivo. |
 | Siete ensayos de interpretación de la realidad peruana | archive.org `mariategui-...-1928` (PDF «Edición digital epublibre 2016») | El texto de 1928 es PD, pero el PDF es una edición digital epublibre/epublibre 2016 con cubierta y editor ©; se descarta y se enlaza el texto MIA. |
 
-## Candidatos pendientes de búsqueda (19)
+## Candidatos pendientes de búsqueda (25)
 
 | Corriente | Candidato | †Año | Fuente prevista |
 |---|---|---|---|
+| Bolivariano | Simón Bolívar — *Carta de Jamaica* (1815) | 1830 | Wikisource, archive.org |
+| Bolivariano | Simón Bolívar — *Discurso de Angostura* (1819) | 1830 | Wikisource, archive.org |
+| Bolivariano | Simón Rodríguez — *Inventamos o erramos* | 1854 | Wikisource, archive.org, Cervantes |
 | Bolivariano | Francisco de Miranda — *Diario de viajes / Colombeia* | 1816 | Internet Archive, Cervantes |
 | Bolivariano | Juan Germán Roscio — *Triunfo de la libertad sobre el despotismo* | 1849 | Internet Archive, Google Books |
 | Bolivariano | Simón Rodríguez — *Sociedades americanas* | 1854 | Internet Archive, Cervantes |
@@ -84,12 +98,15 @@ quedan **fuera** de `books/` y no se enlazan:
 | Martiano | José Martí — *Versos libres* (1878) | 1895 | Cervantes, Internet Archive |
 | Martiano | José Martí — *La edad de oro* (1889) | 1895 | Internet Archive, EcuRed |
 | Martiano | José Martí — *Mi raza* (1905, póstumo) | 1895 | Internet Archive |
+| Martiano | José Martí — *Nuestra América* (1891, edición sin aparato ©) | 1895 | Wikisource, archive.org |
 | Zapatista | *Plan de Ayala* (1911) — escaneo original | — | Internet Archive, Library of Congress |
 | Zapatista | Plan de San Luis Potosí — Francisco I. Madero (1910) | 1931 | Internet Archive |
 | Zapatista | Documentos del Ejército Libertador del Sur (1913-1919) | 1919 | escaneos pre-1930 |
 | Zapatista | Otilio Montaño / textos del gabinete zapatista | 1919 | escaneos pre-1930 |
 | Marxista | Marx — *El Capital*, tomo 1 (1867) | 1883 | marxists.org, Internet Archive |
 | Marxista | Lenin — *¿Qué hacer?* (1902) | 1924 | marxists.org |
+| Marxista | Lenin — *El imperialismo, fase superior del capitalismo* (1917) | 1924 | marxists.org |
+| Marxista | Marx / Engels — *Manifiesto del Partido Comunista* (traducción libre) | 1883 / 1895 | marxists.org, Wikisource |
 | Marxista | Lenin — *Estado y revolución* (1917) | 1924 | marxists.org |
 | Marxista | Engels — *Del socialismo utópico al científico* | 1895 | marxists.org |
 | Antiimperialista | Rubén Darío — *Cantos de vida y esperanza* ("A Roosevelt", 1905) | 1916 | Internet Archive |

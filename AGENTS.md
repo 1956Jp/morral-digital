@@ -14,7 +14,7 @@ Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de de
 
 ## Estructura que no se ve en los nombres
 - `index.html` carga `assets/js/config.js`, luego `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `CFG` (config) se define en `config.js`, `B` (catálogo) en `data.js`, y `app.js` los consume.
-- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=3`, `config.js?v=3`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
+- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=5`, `config.js?v=5`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
 
 ## Configuración y extensión (`assets/js/config.js`)
 Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en `app.js` si falta el archivo). Editar aquí antes de tocar `app.js`:
@@ -40,9 +40,10 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 1. Verificar dominio público **estricto** según `books/MANIFIESTO.md`: autor fallecido +70 años, traducción antigua o marcada PD, y edición sin `D.R.` de terceros.
 2. Subir el PDF a `books/` y añadir la fila de 9 campos en `data.js`.
 3. Registrar la fila en `books/MANIFIESTO.md` (URL de origen, licencia, fecha).
-4. Fuentes bloqueadas Radio Zapatista (NC), Ocean Press (Che). Autores fuera:  Margaret Thatcher, Walter Eucken.
+4. Fuentes bloqueadas: Radio Zapatista (NC), Ocean Press (Che), INEHRM, CLACSO, Z-Library. Autores fuera (copyright vivo): Fidel Castro, Ho Chi Minh, Che Guevara, Hugo Chávez.
+5. **Honestidad del catálogo:** un título sin archivo en `books/` y sin fuente verificable **no se publica**; si ya estaba, se retira (ver «Retiradas del catálogo» en `MANIFIESTO.md`).
 
-## Pago Móvianual, sin backend)
+## Pago Móvil (manual, sin backend)
 - Config en `assets/js/config.js` → `pago`: `pagomovil` (banco/código/teléfono/cédula/titular/qr), `whatsapp` (internacional, sin `0`), `vesRate` (respaldo si fallan las APIs). En `app.js` se leen como `PAGOMOVIL`, `WHATSAPP`, `VES_RATE`, `QR_PM` (con respaldo por defecto).
 - La tasa USD→VES es la **oficial del BCV**, obtenida en `getRate()` con `fetch` a DolarApi (`ve.dolarapi.com/v1/dolares/oficial`, y como respaldo el listado `/v1/dolares` filtrando `fuente=="oficial"`); si fallan, usa `VES_RATE` o muestra «tasa no disponible». Se cachea en `rateCache`.
 - Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. La única otra llamada de red es `saveOrder()` a Supabase (ver abajo). El resto (carrito, reseñas) sigue solo en memoria.
@@ -51,10 +52,11 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 - Los PDF siguen siendo públicos por URL: la «verificación» es por honor hasta tener backend.
 
 ## Registro de pedidos (Supabase, opcional)
-- `done()` llama a `saveOrder(correo, estado)` que hace un `POST` a PostgREST (`{url}/rest/v1/{tabla}`) con cabeceras `apikey`/`Authorization: Bearer {anonKey}` y `Prefer: return=minimal`. Sin librería, mismo estilo que `getRate()`.
-- Config en `config.js` → `supabase{url, anonKey, tabla}`. Vacío = desactivado (`SB_ON=false`), el sitio funciona igual. Constantes `SB`, `SB_URL`, `SB_KEY`, `SB_TABLA`, `SB_ON` en `app.js`.
-- La `anonKey` es **pública** (va en el navegador). La seguridad es una **política RLS de solo-`INSERT`**: `anon` no puede leer los pedidos (protege la PII). NUNCA poner la `service_role`. SQL y detalles en `README.md`.
-- Estado guardado: `pendiente` (Pago Móvil/Cripto) o `demo` (resto); en Pago Móvil añade `monto_bs`/`tasa_bs` desde `rateCache`. Es best-effort: `saveOrder()` traga errores y no bloquea la confirmación.
+- `done()` llama a `saveOrder(correo)`, que hace un `POST` a `${SB_URL}/rest/v1/rpc/registrar_pedido` con cabeceras `apikey`/`Authorization: Bearer {anonKey}` y cuerpo `{p_order_code, p_customer_email, p_payment_method, p_currency, p_total_amount, p_monto_bs, p_tasa_bs, p_items:[{book_title, unit_price, quantity}]}`. Sin librería, mismo estilo que `getRate()`.
+- Config en `config.js` → `supabase{url, anonKey}`. Vacío = desactivado (`SB_ON=false`), el sitio funciona igual. Constantes `SB`, `SB_URL`, `SB_KEY`, `SB_ON` en `app.js`.
+- El esquema vive en `db/supabase_pedidos.sql`: tablas `orders`/`order_items` + **RLS de solo-`INSERT`** para `anon` + la función atómica `registrar_pedido` (`SECURITY INVOKER`, inserta pedido y líneas en una transacción). Sin librería.
+- La `anonKey` es **pública** (va en el navegador). La seguridad es la **RLS de solo-`INSERT`**: `anon` no puede leer los pedidos (protege la PII). NUNCA poner la `service_role`. SQL y detalles en `README.md`.
+- Estado guardado: siempre `pending_review` (el sitio no verifica cobros); en Pago Móvil añade `monto_bs`/`tasa_bs` desde `rateCache`. Es best-effort: `saveOrder()` traga errores y no bloquea la confirmación. Los estados válidos son `pending_review`/`paid`/`rejected`/`cancelled` (los cambias a mano en el panel).
 - En Vercel, `connect-src` de `vercel.json` incluye `https://*.supabase.co`. En GitHub Pages no hay CSP que ajustar.
 
 ## Seguridad y despliegue
@@ -66,7 +68,7 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 
 ## Gotchas
 - El morral guarda **índices de `B`** (`add(i)`/`rm(i)`), no identificadores: insertar filas en medio recoloca los carritos activos.
-- Carrito y reseñas solo en memoria (sin `localStorage`); se borran al recargar. No persistir salvo que se pida. Única llamada de red: `getRate()` para la tasa del Pago Móvil (ver arriba).
+- Carrito y reseñas solo en memoria (sin `localStorage`); se borran al recargar. No persistir salvo que se pida. Llamadas de red: `getRate()` (tasa del Pago Móvil) y, si está activado, `saveOrder()` a Supabase (ver arriba).
 - El pago es una demo deliberada salvo **Pago Móvil** (cobro manual): `done()` inventa/usa el pedido y luego sirve los PDF de `books/`, que son públicos y accesibles sin pagar. Para cobro automático real hay que sustituir `done()` por Stripe/PayPal/MercadoPago con backend (lo documenta README).
 - Modo oscuro solo por CSS (`prefers-color-scheme` + `:root[data-theme="dark"]` en `styles.css`); no hay interruptor.
 - Copia de interfaz en español.

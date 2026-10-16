@@ -28,10 +28,10 @@ window.CFG = {
   // --------------------------------------------------------- Textos
   textos: {
     catalogoTitulo: "Catálogo libre",
-    catalogoSub: "Obras de dominio público: bolivariano, martiano, zapatista, marxista, antiimperialista y latinoamericano. Cada libro cuesta entre $1 y $2 USD: un aporte solidario que sostiene la biblioteca, no una renta sobre las ideas.",
-    catalogoNota: "Nota editorial: solo publicamos obras de dominio público estricto, con la fuente y la licencia registradas en books/MANIFIESTO.md. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).",
+    catalogoSub: "Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario de $2 USD (Ariel, Facundo, El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo); los demás son enlaces gratuitos a su fuente original.",
+    catalogoNota: "Nota editorial: solo publicamos obras de dominio público estricto, con archivo y fuente verificados en books/MANIFIESTO.md. Todo título sin archivo y sin fuente comprobable queda retirado del catálogo. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).",
     resenasTitulo: "Voces del morral",
-    resenasSub: "Reseñas de lectores",
+    resenasSub: "Reseñas de ejemplo · el formulario es local y no se envía a ningún servidor",
     expansionTitulo: "Hoja de ruta",
     expansionSub: "Así crecerá el Morral",
     morralTitulo: "Tu morral",
@@ -84,12 +84,13 @@ window.CFG = {
 
   // ------------------------------------------------ Pedidos (Supabase)
   // Registro opcional de pedidos. Si `url` o `anonKey` quedan vacíos, se
-  // desactiva y el sitio funciona igual. La `anonKey` es PÚBLICA (va en el
-  // navegador): protégela con una política RLS de solo-INSERT en la tabla
-  // (ver README). NUNCA pongas aquí la `service_role` ni ninguna clave privada.
+  // desactiva y el sitio funciona igual. Ejecuta antes el SQL de
+  // `db/supabase_pedidos.sql` (tablas `orders`/`order_items` + función rpc
+  // `registrar_pedido`). La `anonKey` es PÚBLICA (va en el navegador): la
+  // protección es la política RLS de solo-INSERT. NUNCA pongas aquí la
+  // `service_role` ni ninguna clave privada.
   supabase: {
     url: "",            // https://TU-PROYECTO.supabase.co
-    anonKey: "",        // clave anónima pública (NO la service_role)
-    tabla: "pedidos"
+    anonKey: ""         // clave anónima pública (NO la service_role)
   }
 };

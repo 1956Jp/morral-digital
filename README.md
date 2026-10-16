@@ -10,6 +10,7 @@ Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, ant
 - `assets/js/app.js` – morral, filtros, pago, descargas y reseñas
 - `books/` – archivos PDF/EPUB
 - `books/MANIFIESTO.md` – registro de dominio público (fuente, licencia, verificación)
+- `db/supabase_pedidos.sql` – esquema SQL para registrar pedidos en Supabase (opcional)
 
 ## Personalizar (sin tocar el código)
 Casi todo se cambia en **`assets/js/config.js`**; `index.html`, `app.js` y `styles.css` solo si añades funciones nuevas.
@@ -20,7 +21,7 @@ Casi todo se cambia en **`assets/js/config.js`**; `index.html`, `app.js` y `styl
 - **Datos de cobro** → `pago` (PayPal, Pago Móvil, Binance, WhatsApp, tasa de respaldo).
 - **Libros** → `assets/js/data.js` + `books/MANIFIESTO.md` (ver «Añadir un libro» en `AGENTS.md`).
 - **Funciones nuevas** → añade el código en `assets/js/app.js`; los textos/etiquetas que uses, léelos de `CFG`.
-- **Al cambiar CSS/JS**, sube el número de versión en `index.html` (`assets/...?v=3`) para evitar cachés del navegador.
+- **Al cambiar CSS/JS**, sube el número de versión en `index.html` (`assets/...?v=N`, todos los `?v=` al mismo valor) para evitar cachés del navegador.
 
 ## Previsualizar en local
 ```bash
@@ -41,7 +42,7 @@ Sitio estático sin build: importa el repositorio en Vercel (framework **Other**
 
 ## Seguridad (GitHub vs. Vercel)
 - **GitHub Pages no permite cabeceras HTTP propias**; Vercel sí, vía `vercel.json` (CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`). El `index.html` también lleva `<meta name="referrer" content="no-referrer">` como mínimo común.
-- La **CSP** de `vercel.json` permite solo orígenes propios + Google Fonts + `ve.dolarapi.com`; necesita `'unsafe-inline'` en `script-src`/`style-src` porque la interfaz usa manejadores y estilos en línea. Endurecerla más requiere sacar los `onclick`/`style` a `app.js`/`styles.css`.
+- La **CSP** de `vercel.json` permite solo orígenes propios + Google Fonts + `ve.dolarapi.com` + `https://*.supabase.co`; necesita `'unsafe-inline'` en `script-src`/`style-src` porque la interfaz usa manejadores y estilos en línea. Endurecerla más requiere sacar los `onclick`/`style` a `app.js`/`styles.css`.
 - El repositorio es **público**: la PII de cobro (cédula, teléfono, correo, Binance Pay) queda visible. Es inevitable en el Pago Móvil (el banco exige la cédula del beneficiario); valora usar cuentas dedicadas. **Nunca** subas claves privadas, frases semilla, 2FA ni tokens (el `.gitignore` cubre `.env`, `*.pem`, `*.token`, `gh_token`).
 - GitHub: activa *Secret scanning* y *Dependabot* en *Settings → Code security*. Rota cualquier token que se haya compartido. Los `.git` no se publican (Pages y Vercel no sirven `/.git/`; el `servir.sh` local también lo bloquea).
 
@@ -59,29 +60,16 @@ GitHub Pages es un servidor estático: el pago actual es una **demostración**. 
 Para entregar archivos solo tras el pago se necesita un backend (p. ej. Netlify/Vercel Functions o Stripe + webhook); con PayPal.me o Pago Móvil manual no se verifica el cobro.
 
 ## Registrar pedidos con Supabase (opcional)
-Al confirmar un pedido (`done()` en `app.js`), el sitio puede guardarlo en una tabla de [Supabase](https://supabase.com) vía su API REST (PostgREST), sin librerías ni build. Es opcional: si no lo configuras, todo sigue igual.
+Al confirmar un pedido (`done()` en `app.js`), el sitio lo registra en [Supabase](https://supabase.com) vía su API REST (PostgREST), sin librerías ni build. Es opcional: si no lo configuras, todo sigue igual.
 
-1. **Crea la tabla y la política RLS** (SQL Editor de Supabase). La política permite **solo insertar** desde el navegador (`anon`): nadie puede *leer* los pedidos, así la PII (correo) no queda expuesta.
-   ```sql
-   create table if not exists pedidos (
-     id        bigint generated always as identity primary key,
-     codigo    text not null,
-     correo    text not null,
-     metodo    text not null,
-     libros    jsonb not null default '[]'::jsonb,
-     total_usd numeric(10,2) not null default 0,
-     monto_bs  numeric(14,2),
-     tasa_bs   numeric(14,4),
-     estado    text not null default 'pendiente',
-     fecha     timestamptz not null default now()
-   );
-   alter table pedidos enable row level security;
-   create policy "insertar pedidos" on pedidos for insert to anon with check (true);
-   ```
-2. **Rellena `supabase` en `assets/js/config.js`**: `url` (`https://TU-PROYECTO.supabase.co`), `anonKey` (clave **anónima** pública; **nunca** la `service_role`) y `tabla` (por defecto `pedidos`).
-3. Cada pedido queda con `codigo`, `correo`, `metodo`, `libros` (títulos), `total_usd`, `estado` (`pendiente` para Pago Móvil/Cripto, `demo` para el resto), `fecha` y, en Pago Móvil, `monto_bs`/`tasa_bs`. Consúltalos desde el panel de Supabase (Table Editor) o con la `service_role` desde el servidor.
+1. **Ejecuta el esquema**: pega el contenido de `db/supabase_pedidos.sql` en el **SQL Editor** de Supabase y pulsa Run. Crea:
+   - `orders` — una fila por pedido (`order_code`, `customer_email`, `payment_method`, `status`, `total_amount`, `monto_bs`, `tasa_bs`, `created_at`…).
+   - `order_items` — una fila por libro (`book_title`, `unit_price`, `quantity`), con `on delete cascade` hacia `orders`.
+   - Índices, **RLS con políticas de solo-INSERT para `anon`** (el navegador no puede leer pedidos: la PII del correo queda protegida) y la función atómica **`registrar_pedido(...)`**, que inserta pedido y líneas en una sola transacción (si algo falla, no queda un pedido sin libros).
+2. **Rellena `supabase` en `assets/js/config.js`**: `url` (`https://TU-PROYECTO.supabase.co`) y `anonKey` (clave **anónima** pública; **nunca** la `service_role`).
+3. Cada pedido entra como `pending_review` (el sitio no verifica cobros) con su correo, método de pago y líneas; en Pago Móvil guarda además `monto_bs`/`tasa_bs` con la tasa BCV del momento. Consúltalos en el **Table Editor** de Supabase (o con la `service_role` desde el servidor) y márcalos `paid` cuando confirmes el comprobante.
 
-Seguridad: la `anonKey` es pública por diseño; la protección es la **RLS de solo-INSERT**. En Vercel, el `connect-src` de `vercel.json` ya incluye `https://*.supabase.co`; en GitHub Pages no hay CSP que ajustar.
+Seguridad: la `anonKey` es pública por diseño; la protección es la **RLS de solo-INSERT**, y `registrar_pedido` corre como `SECURITY INVOKER` para que esa RLS siga aplicando. En Vercel, el `connect-src` de `vercel.json` ya incluye `https://*.supabase.co`; en GitHub Pages no hay CSP que ajustar.
 
 ## Derechos
 Solo se publican obras de **dominio público estricto** (autor fallecido + 70 años, traducción y edición también libres de copyright de terceros). Cada título debe estar registrado en `books/MANIFIESTO.md` con su URL de origen y su licencia antes de publicarse.
