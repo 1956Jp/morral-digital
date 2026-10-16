@@ -94,7 +94,7 @@ try{await fetch(`${SB_URL}/rest/v1/rpc/registrar_pedido`,{method:"POST",headers:
 // o no hay config, no rompe la confirmación. Límite de EmailJS: 1 envío/segundo.
 async function sendMail(tpl,params){
 if(!MAIL_ON||!tpl)return;
-try{await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})})}catch(e){}}
+try{const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})});if(!r.ok)console.warn("EmailJS",tpl,`HTTP ${r.status}`,await r.text().catch(()=>""))}catch(e){console.warn("EmailJS: fallo de red",tpl,e)}}
 // Avisa al administrador del pedido y manda al cliente un acuse con (opcional)
 // sus enlaces. Se separa ~1s para respetar el límite de EmailJS.
 async function notifyOrder(correo,codigo){
