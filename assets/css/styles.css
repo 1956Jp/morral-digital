@@ -1,6 +1,6 @@
-:root{--bg:#eef6f3;--card:#fbfffd;--ink:#17302d;--mut:#4f6b66;--red:#1f7a8c;--gold:#3fae8a;--green:#2c6e49;--line:#cfe3dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f1e;--card:#162b29;--ink:#e4f3ee;--mut:#9bbdb5;--red:#2a9bb0;--gold:#6fd1a5;--green:#7fcf9f;--line:#264240}}
-:root[data-theme="dark"]{--bg:#0f1f1e;--card:#162b29;--ink:#e4f3ee;--mut:#9bbdb5;--red:#2a9bb0;--gold:#6fd1a5;--green:#7fcf9f;--line:#264240}
+:root{--bg:#eef6f3;--card:#fbfffd;--ink:#17302d;--mut:#4f6b66;--red:#1f7a8c;--gold:#c9971b;--oro:#8a6608;--green:#2c6e49;--line:#cfe3dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f1e;--card:#162b29;--ink:#e4f3ee;--mut:#9bbdb5;--red:#2a9bb0;--gold:#e9c14d;--oro:#f2d071;--green:#7fcf9f;--line:#264240}}
+:root[data-theme="dark"]{--bg:#0f1f1e;--card:#162b29;--ink:#e4f3ee;--mut:#9bbdb5;--red:#2a9bb0;--gold:#e9c14d;--oro:#f2d071;--green:#7fcf9f;--line:#264240}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Lora,Georgia,serif}
 h1,h2,h3,.btn,nav a{font-family:Oswald,Impact,sans-serif;letter-spacing:.03em}
@@ -15,7 +15,7 @@ nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}nav a{color:var(--in
 .hero h1{font-weight:500;font-size:clamp(28px,5.5vw,48px);margin:0;line-height:1.05;color:var(--red)}
 .hero p{max-width:640px;margin:16px auto 24px;color:var(--mut)}
 .stars{color:var(--gold);letter-spacing:3px}
-section{padding:36px 0}h2{font-size:30px;margin:0 0 6px;color:var(--green)}
+section{padding:36px 0}h2{font-size:30px;margin:0 0 6px;color:var(--oro)}
 .sub{color:var(--mut);margin:0 0 20px}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:99px;cursor:pointer;font:14px Oswald,sans-serif}

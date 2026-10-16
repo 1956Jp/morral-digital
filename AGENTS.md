@@ -14,7 +14,7 @@ Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de de
 
 ## Estructura que no se ve en los nombres
 - `index.html` carga `assets/js/config.js`, luego `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `CFG` (config) se define en `config.js`, `B` (catálogo) en `data.js`, y `app.js` los consume.
-- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=5`, `config.js?v=5`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
+- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=7`, `config.js?v=7`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
 
 ## Configuración y extensión (`assets/js/config.js`)
 Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en `app.js` si falta el archivo). Editar aquí antes de tocar `app.js`:
