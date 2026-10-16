@@ -90,21 +90,27 @@ create policy "anon_insert_items"
 --      "p_items": [{"book_title": "Ariel", "unit_price": 2, "quantity": 1}]
 --    }
 -- ---------------------------------------------------------------------
+--  Nota: los parámetros obligatorios van PRIMERO; los que tienen default
+--  ('USD'/null) van al final (regla de SQL). PostgREST empareja por nombre,
+--  así que el orden no afecta cómo se llama desde el sitio.
+--  Nota: NO se usa `insert ... returning id` porque eso exigiría una
+--  política SELECT para `anon` (que no existe a propósito: protege la PII).
+--  El id se genera con gen_random_uuid() y se inserta explícito.
 create or replace function public.registrar_pedido(
   p_order_code text,
   p_customer_email text,
   p_payment_method text,
-  p_currency text default 'USD',
   p_total_amount numeric,
+  p_items jsonb,
+  p_currency text default 'USD',
   p_monto_bs numeric default null,
-  p_tasa_bs numeric default null,
-  p_items jsonb
+  p_tasa_bs numeric default null
 ) returns uuid
 language plpgsql
 set search_path = public
 as $$
 declare
-  v_id uuid;
+  v_id uuid := gen_random_uuid();
 begin
   if p_items is null or jsonb_typeof(p_items) <> 'array'
      or jsonb_array_length(p_items) = 0 then
@@ -112,13 +118,12 @@ begin
   end if;
 
   insert into public.orders (
-    order_code, customer_email, payment_method, currency,
+    id, order_code, customer_email, payment_method, currency,
     total_amount, monto_bs, tasa_bs
   ) values (
-    p_order_code, p_customer_email, p_payment_method, p_currency,
+    v_id, p_order_code, p_customer_email, p_payment_method, p_currency,
     p_total_amount, p_monto_bs, p_tasa_bs
-  )
-  returning id into v_id;
+  );
 
   insert into public.order_items (order_id, book_title, unit_price, quantity)
   select
@@ -135,9 +140,9 @@ $$;
 -- Solo el navegador (anon) puede ejecutarla. La lectura de pedidos se hace
 -- desde el panel de Supabase o con la service_role.
 revoke execute on function public.registrar_pedido(
-  text, text, text, text, numeric, numeric, numeric, jsonb
+  text, text, text, numeric, jsonb, text, numeric, numeric
 ) from public, anon, authenticated;
 
 grant execute on function public.registrar_pedido(
-  text, text, text, text, numeric, numeric, numeric, jsonb
+  text, text, text, numeric, jsonb, text, numeric, numeric
 ) to anon;

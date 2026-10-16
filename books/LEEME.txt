@@ -1,2 +1,7 @@
-Coloca aquí los libros digitales (PDF/EPUB) de dominio público.
-Solo sube obras cuya licencia permita su libre circulación.
+En esta carpeta solo queda documentación (MANIFIESTO.md, LEEME.txt) y,
+si los tienes, copias locales de los libros de pago para subirlos.
+
+Los PDF/EPUB de pago YA NO se publican aquí: se sirven desde el bucket
+privado `libros` de Supabase Storage y se entregan con URLs firmadas
+(ver AGENTS.md, «Entrega protegida», y db/supabase_storage.sql).
+Los libros gratuitos son enlaces a su fuente original, no archivos.

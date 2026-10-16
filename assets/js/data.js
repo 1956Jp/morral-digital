@@ -1,17 +1,17 @@
 // Catálogo: [0 título, 1 autor, 2 corriente, 3 precio USD (0 = enlace gratuito, no se vende),
-//            4 color, 5 descripción, 6 archivo en books/, 7 fuente (URL de origen), 8 licencia]
+//            4 color, 5 descripción, 6 archivo (objeto en el bucket privado `libros`), 7 fuente (URL de origen), 8 licencia]
 // Corrientes: Bolivariano, Antiimperialista, Latinoamericano, Martiano, Zapatista, Marxista
 // Regla: solo dominio público estricto; verificar cada edición en books/MANIFIESTO.md
 const B=[
-["Ariel","José Enrique Rodó","Latinoamericano",2,"#2f6fb0","Defensa de la identidad cultural latinoamericana (1900).","ariel.pdf","https://archive.org/details/arielrod00roduoft","Dominio público"],
+["Ariel","José Enrique Rodó","Latinoamericano",1.5,"#2f6fb0","Defensa de la identidad cultural latinoamericana (1900).","ariel.pdf","https://archive.org/details/arielrod00roduoft","Dominio público"],
 ["Primera Declaración de la Selva Lacandona","EZLN","Zapatista",0,"#7a4a2f","Comunicado fundacional del EZLN (1994). Texto original, sin venta: solo enlace.","","https://enlacezapatista.ezln.org.mx/1994/01/01/primera-declaracion-de-la-selva-lacandona","Enlace libre (copyright EZLN)"],
 ["Al pueblo de México: las demandas del EZLN","EZLN","Zapatista",0,"#8a5a3f","Pliego de demandas del levantamiento de 1994. Texto original, sin venta: solo enlace.","","https://enlacezapatista.ezln.org.mx/1994/03/01/al-pueblo-de-mexico-las-demandas-del-ezln","Enlace libre (copyright EZLN)"],
 ["La palabra del EZLN (archivo de comunicados)","EZLN","Zapatista",0,"#5a3a2f","Archivo de comunicados desde 2011. Radio Zapatista publica bajo CC BY-NC-SA: enlace gratuito.","","https://radiozapatista.org/?page_id=3365","Enlace libre (CC BY-NC-SA)"],
-["Facundo","Domingo F. Sarmiento","Latinoamericano",2,"#35608f","Civilización o barbarie: radiografía de la Argentina del siglo XIX y del caudillismo (1845).","facundo.pdf","https://archive.org/details/facundos00sarmuoft","Dominio público"],
-["El porvenir de la América Latina","Manuel Ugarte","Antiimperialista",2,"#8a2f2f","Denuncia del imperialismo en América y apuesta por la unidad latinoamericana (1910).","ugarte-el-porvenir.pdf","https://www.siese.org/modulos/manuel_ugarte/elporvenir.pdf","Dominio público"],
-["La República Argentina y el caso de Venezuela","Luis María Drago","Antiimperialista",2,"#a33b2b","Origen de la Doctrina Drago: rechazo al cobro de deudas con la fuerza (1903).","drago-caso-venezuela.pdf","http://www.bibliotecadigital.gob.ar/items/show/847","Dominio público"],
-["Noli me tángere","José Rizal","Antiimperialista",2,"#7a2e46","Novela anticolonial filipina contra el dominio español (1887).","noli-me-tangere.epub","https://www.gutenberg.org/ebooks/47584","Dominio público"],
-["El Filibusterismo","José Rizal","Antiimperialista",2,"#6d2440","Continuación de Noli: la denuncia del despotismo colonial (1891).","el-filibusterismo.epub","https://www.gutenberg.org/ebooks/30903","Dominio público"],
+["Facundo","Domingo F. Sarmiento","Latinoamericano",1.5,"#35608f","Civilización o barbarie: radiografía de la Argentina del siglo XIX y del caudillismo (1845).","facundo.pdf","https://archive.org/details/facundos00sarmuoft","Dominio público"],
+["El porvenir de la América Latina","Manuel Ugarte","Antiimperialista",1,"#8a2f2f","Denuncia del imperialismo en América y apuesta por la unidad latinoamericana (1910).","ugarte-el-porvenir.pdf","https://www.siese.org/modulos/manuel_ugarte/elporvenir.pdf","Dominio público"],
+["La República Argentina y el caso de Venezuela","Luis María Drago","Antiimperialista",1,"#a33b2b","Origen de la Doctrina Drago: rechazo al cobro de deudas con la fuerza (1903).","drago-caso-venezuela.pdf","http://www.bibliotecadigital.gob.ar/items/show/847","Dominio público"],
+["Noli me tángere","José Rizal","Antiimperialista",1,"#7a2e46","Novela anticolonial filipina contra el dominio español (1887).","noli-me-tangere.epub","https://www.gutenberg.org/ebooks/47584","Dominio público"],
+["El Filibusterismo","José Rizal","Antiimperialista",1,"#6d2440","Continuación de Noli: la denuncia del despotismo colonial (1891).","el-filibusterismo.epub","https://www.gutenberg.org/ebooks/30903","Dominio público"],
 ["Manifiesto de Cartagena","Simón Bolívar","Bolivariano",0,"#1f6f8c","Primera memoria de Bolívar: causas de la caída de la república (1812). Texto libre.","","https://es.wikisource.org/wiki/Manifiesto_de_Cartagena","Dominio público"],
 ["Ismaelillo","José Martí","Martiano",0,"#245a86","Poemario de Martí para su hijo, ruptura de la métrica tradicional (1882). Texto libre.","","https://es.wikisource.org/wiki/Ismaelillo","Dominio público"],
 ["El presidio político en Cuba","José Martí","Martiano",0,"#33508a","Testimonio de Martí sobre la prisión y el trabajo forzado (1871). Texto libre.","","https://es.wikisource.org/wiki/El_presidio_pol%C3%ADtico_en_Cuba","Dominio público"],

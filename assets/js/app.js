@@ -24,6 +24,15 @@ const QR_CRYPTO=BINANCE.qr||"";               // QR opcional de Binance Pay
 const SB=CFG.supabase||{};
 const SB_URL=(SB.url||"").replace(/\/+$/,""),SB_KEY=SB.anonKey||"";
 const SB_ON=!!(SB_URL&&SB_KEY);
+// Entrega protegida: Edge Function que valida que el pedido esté `paid` y
+// devuelve URLs firmadas temporales de los archivos en el bucket privado
+// `libros` (ver supabase/functions/entregar y AGENTS.md).
+const SB_FN_ENTREGAR=SB_URL?`${SB_URL}/functions/v1/entregar`:"";
+// EmailJS: correos opcionales al cerrar un pedido (acuse al cliente y aviso al
+// admin). REST/JSON sin librerías, como getRate()/saveOrder(). La publicKey es
+// PÚBLICA; la protección es el «Allowlist» de orígenes en el panel de EmailJS.
+const MAIL=CFG.emailjs||{};
+const MAIL_ON=!!(MAIL.publicKey&&MAIL.serviceId);
 // Textos y etiquetas editables desde config.js
 const TXT=Object.assign({botonComprar:"COMPRAR",botonGratis:"Leer gratis",etiquetaMorral:"Añadir al morral",morralTitulo:"Tu morral"},_textos);
 const ETIQ=Object.assign({card:"Tarjeta",paypal:"PayPal",bank:"Pago Móvil",crypto:"Cripto",zinli:"Zinli"},CFG.etiquetasPago||{});
@@ -34,6 +43,14 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const newOrder=()=>"MD-"+Math.random().toString(36).slice(2,8).toUpperCase();
 const bsFmt=n=>new Intl.NumberFormat("es-VE",{style:"currency",currency:"VES",minimumFractionDigits:2}).format(n);
 const toBs=(usd,rate)=>usd*rate;
+// Morral persistente: guarda los TÍTULOS (id estable) en localStorage, no los
+// índices de B (que cambian si Supabase reemplaza el catálogo en loadBooks()).
+const CART_KEY="morral-digital:cart:v1";
+const rowOf=k=>B.find(b=>b[0]===k);
+const cartRows=()=>cart.map(rowOf).filter(Boolean);
+const cartTitles=()=>cartRows().map(r=>r[0]);
+function saveCart(){try{localStorage.setItem(CART_KEY,JSON.stringify(cart))}catch(e){}}
+function loadCart(){try{const a=JSON.parse(localStorage.getItem(CART_KEY)||"[]");return Array.isArray(a)?a.filter(k=>typeof k==="string"&&rowOf(k)):[]}catch(e){return[]}}
 async function getRate(){
 if(rateCache)return rateCache;
 const cands=[
@@ -54,10 +71,10 @@ else{el.textContent="tasa no disponible"}
 const wa=document.getElementById("pm-wa");if(!wa)return;
 const rate=info?info.rate:0;
 const bs=rate?`${bsFmt(toBs(usd,rate))} (tasa ${bsFmt(rate)})`:"monto en Bs a confirmar";
-wa.href=waLink(`Hola, envío mi comprobante de Pago Móvil.\nPedido: ${orderCode}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(usd)}\nMonto en Bs: ${bs}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`)}
+wa.href=waLink(`Hola, envío mi comprobante de Pago Móvil.\nPedido: ${orderCode}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(usd)}\nMonto en Bs: ${bs}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`)}
 function fillCrypto(){
 const wa=document.getElementById("pm-wa");if(!wa)return;
-wa.href=waLink(`Hola, envío mi comprobante de pago en cripto.\nPedido: ${orderCode}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`)}
+wa.href=waLink(`Hola, envío mi comprobante de pago en cripto.\nPedido: ${orderCode}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`)}
 // Registra el pedido en Supabase (REST/PostgREST, sin librerías). Silencioso: si
 // falla o no hay config, no rompe la confirmación. La tabla debe tener RLS de solo-INSERT.
 async function saveOrder(correo){
@@ -66,13 +83,35 @@ const info=rateCache,usd=total();if(!(usd>0))return;
 // Agrupa el carrito por título (hoy la cantidad es siempre 1) y lo envía
 // como `p_items` a la función rpc `registrar_pedido`.
 const grupos={};
-for(const i of cart){const t=B[i][0];grupos[t]=grupos[t]||{book_title:t,unit_price:+B[i][3].toFixed(2),quantity:0};grupos[t].quantity++}
+for(const r of cartRows()){const t=r[0];grupos[t]=grupos[t]||{book_title:t,unit_price:+r[3].toFixed(2),quantity:0};grupos[t].quantity++}
 const esBanco=lastMethod=="bank";
 const row={p_order_code:orderCode,p_customer_email:String(correo||""),p_payment_method:lastMethod,p_currency:"USD",p_total_amount:+usd.toFixed(2),
 p_monto_bs:esBanco&&info?+toBs(usd,info.rate).toFixed(2):null,
 p_tasa_bs:esBanco&&info?+info.rate.toFixed(4):null,
 p_items:Object.values(grupos)};
 try{await fetch(`${SB_URL}/rest/v1/rpc/registrar_pedido`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(row)})}catch(e){}}
+// Envía un correo vía EmailJS (REST/JSON, sin librerías). Silencioso: si falla
+// o no hay config, no rompe la confirmación. Límite de EmailJS: 1 envío/segundo.
+async function sendMail(tpl,params){
+if(!MAIL_ON||!tpl)return;
+try{await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})})}catch(e){}}
+// Avisa al administrador del pedido y manda al cliente un acuse con (opcional)
+// sus enlaces. Se separa ~1s para respetar el límite de EmailJS.
+async function notifyOrder(correo,codigo){
+if(!MAIL_ON)return;
+const info=rateCache,usd=total(),banco=lastMethod=="bank";
+const base=location.href.replace(/[^/]*$/,"");
+// Entrega protegida: los archivos viven en un bucket privado, así que el
+// correo NO puede llevar el archivo ni una URL pública. En su lugar envía
+// instrucciones para reclamarlo en el sitio («Mis descargas»).
+const claimInfo=MAIL.enviarEnlaces?`<p>Cuando confirmemos tu pago podrás descargar tus libros en <a href="${base}">la tienda</a>: pulsa «Mis descargas» e introduce el código <b>${codigo}</b> y tu correo.</p>`:"";
+const params={email:String(correo||""),client_email:String(correo||""),admin_email:MAIL.adminEmail||"",order_code:codigo,metodo:ETIQ[lastMethod]||lastMethod,total:f(usd),moneda:"USD",
+monto_bs:banco&&info?bsFmt(toBs(usd,info.rate)):"",tasa_bs:banco&&info?bsFmt(info.rate):"",
+items:cartTitles().join(", "),enlaces:claimInfo,
+whatsapp:waLink(`Hola, sobre el pedido ${codigo} de El Morral Digital`)};
+await sendMail(MAIL.templateAdmin,params);
+await new Promise(r=>setTimeout(r,1100));
+await sendMail(MAIL.templateCliente,params)}
 // ==== Supabase: catálogo, reseñas y actividad por sección ====
 // Mismo estilo que saveOrder (REST/PostgREST, sin librerías). Todo es
 // best-effort: si no hay config o la red falla, el sitio usa los datos
@@ -134,11 +173,11 @@ set("nav-catalogo",n.catalogo);set("nav-resenas",n.resenas);set("nav-expansion",
 applyTheme();toggleSections()}
 function draw(){const cs=["Todos",...new Set(B.map(b=>b[2]))];
 $("filters").innerHTML=cs.map(c=>`<button class="chip ${c==cat?"on":""}" onclick="cat='${c}';draw()">${c}</button>`).join("");
-$("grid").innerHTML=B.map((b,i)=>({b,i})).filter(o=>cat=="Todos"||o.b[2]==cat).map(({b,i})=>`<div class="book"><div class="cover" style="--c:${b[4]};border-top:5px solid ${b[4]};background:linear-gradient(150deg,${b[4]}1f,${b[4]}4d)">${IC[b[2]]}<span class="cb">${b[2]}</span><b>${b[0]}</b><small>${b[1]}</small></div><div class="bb"><span class="tag">★ ${b[8]||"Dominio público"} · ${b[2]}</span><p>${b[5]}</p><div class="row"><span class="price">${b[3]?f(b[3]):"Gratis"}</span>${b[3]?`<button class="btn" onclick="add(${i})" title="${TXT.etiquetaMorral}">${TXT.botonComprar}</button>`:`<a class="btn" href="${b[7]}" target="_blank" rel="noopener">${TXT.botonGratis}</a>`}</div></div></div>`).join("")}
-function add(i){if(!B[i][3]||cart.includes(i))return;cart.push(i);upd();openCart()}
-function rm(i){cart=cart.filter(x=>x!=i);upd()}
-const total=()=>cart.reduce((s,i)=>s+B[i][3],0);
-function upd(){$("cnt").textContent=cart.length;$("items").innerHTML=cart.length?cart.map(i=>`<div class="item"><span>${B[i][0]}</span><span>${f(B[i][3])} <a href="#" onclick="rm(${i});return false">✕</a></span></div>`).join(""):"<p class='sub'>Tu morral está vacío.</p>";$("tot").textContent=f(total())}
+$("grid").innerHTML=B.map((b,i)=>({b,i})).filter(o=>cat=="Todos"||o.b[2]==cat).map(({b,i})=>`<div class="book"><div class="cover" style="--c:${b[4]};border-top:5px solid ${b[4]};background:linear-gradient(150deg,${b[4]}1f,${b[4]}4d)">${IC[b[2]]}<span class="cb">${b[2]}</span><b>${b[0]}</b><small>${b[1]}</small></div><div class="bb"><span class="tag">★ ${b[8]||"Dominio público"} · ${b[2]}</span><p>${b[5]}</p><div class="row"><span class="price${b[3]?"":" gratis"}">${b[3]?f(b[3]):"Gratis"}</span>${b[3]?`<button class="btn comprar" onclick="add(${i})" title="${TXT.etiquetaMorral}">${TXT.botonComprar}</button>`:`<a class="btn gratis" href="${b[7]}" target="_blank" rel="noopener">${TXT.botonGratis}</a>`}</div></div></div>`).join("")}
+function add(i){const k=B[i][0];if(!B[i][3]||cart.includes(k))return;cart.push(k);upd();openCart()}
+function rmAt(idx){cart.splice(idx,1);upd()}
+const total=()=>cart.reduce((s,k)=>{const r=rowOf(k);return s+(r?+r[3]:0)},0);
+function upd(){cart=cart.filter(k=>rowOf(k));$("cnt").textContent=cart.length;$("items").innerHTML=cart.length?cart.map((k,idx)=>{const r=rowOf(k);return `<div class="item"><span>${r[0]}</span><span>${f(r[3])} <a href="#" onclick="rmAt(${idx});return false">✕</a></span></div>`}).join(""):"<p class='sub'>Tu morral está vacío.</p>";$("tot").textContent=f(total());saveCart()}
 function openCart(){closeAll();$("cart").classList.add("show")}
 function closeAll(){["cart","pay"].forEach(x=>$(x).classList.remove("show"))}
 function checkout(){if(!cart.length)return;orderCode=newOrder();closeAll();$("pay").classList.add("show");method(METODOS[0])}
@@ -169,19 +208,58 @@ $("pm").innerHTML=`<h2>Pagar ${f(total())}</h2><div class="tabs">${METODOS.map(k
 <button class="btn alt" style="width:100%" onclick="done()">${(m=="bank"||m=="crypto")?"Ya pagué, enviar comprobante":(m=="paypal"||m=="zinli"?"Ya pagué, mostrar descargas":"Confirmar pago")}</button>
 ${(m=="bank"||m=="crypto")?`<a class="btn wa" id="pm-wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:10px" href="${waLink("Hola, quiero pagar el pedido "+orderCode)}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Cobro manual: tu pedido queda <b>pendiente de verificación</b> hasta confirmar el comprobante.</p>`:`<p class="note" style="margin-top:12px">Modo demostración: no se procesa ningún cobro real. El pago con PayPal abre paypal.me/${PAYPAL_USER}; para entregar los archivos solo tras el cobro hace falta un servidor propio (webhook).</p>`}`;
 if(m=="bank")fillBank();else if(m=="crypto")fillCrypto()}
+// ==== Entrega protegida (Fase 2): reclamo de descargas ====
+// El pedido nace `pending_review`. Cuando el admin lo marca `paid` en el
+// panel de Supabase, el cliente comprueba aquí y recibe URLs firmadas
+// temporales (~1 h) generadas por la Edge Function `entregar`, que lee los
+// archivos del bucket privado `libros`. Los PDF/EPUB de pago ya no se
+// publican en books/ (repo público).
+let pendingClaim=null;
+function claimStored(){
+const cc=document.getElementById("cl-code"),ce=document.getElementById("cl-em");
+const code=(cc&&cc.value)||(pendingClaim&&pendingClaim.code)||orderCode;
+const email=(ce&&ce.value)||(pendingClaim&&pendingClaim.email)||"";
+claim(code,email)}
+async function claim(code,email){
+const box=document.getElementById("dl");
+code=String(code||"").trim().toUpperCase();email=String(email||"").trim();
+if(box)box.innerHTML="<p class='note'>Comprobando…</p>";
+if(!SB_FN_ENTREGAR){if(box)box.innerHTML="<p class='note'>La entrega no está configurada.</p>";return}
+if(!code||!email.includes("@")){if(box)box.innerHTML="<p class='note'>Escribe tu código de pedido y tu correo.</p>";return}
+let data;
+try{const r=await fetch(SB_FN_ENTREGAR,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({order_code:code,email})});data=await r.json()}
+catch(e){if(box)box.innerHTML="<p class='note'>No se pudo comprobar. Revisa tu conexión e inténtalo de nuevo.</p>";return}
+if(!box)return;
+if(data.error==="not_found"){box.innerHTML="<p class='note'>No encontramos ese pedido. Revisa el código y el correo.</p>";return}
+if(data.error==="forbidden"){box.innerHTML="<p class='note'>El correo no coincide con el del pedido.</p>";return}
+if(data.error){box.innerHTML="<p class='note'>No se pudo comprobar el pedido. Inténtalo más tarde.</p>";return}
+if(data.status!=="paid"){box.innerHTML="<p class='note'>Tu pago aún <b>no está verificado</b>. Te avisaremos a tu correo cuando lo confirmemos; podrás descargar aquí cuando esté listo.</p>";return}
+const links=(data.links||[]).filter(l=>l.url);
+if(!links.length){box.innerHTML="<p class='note'>No hay archivos disponibles para este pedido.</p>";return}
+const mins=Math.max(1,Math.round((data.expires_in||3600)/60));
+box.innerHTML=`<p class="sub">Tus descargas (enlaces válidos ~${mins} min):</p>`+links.map(l=>l.kind==="external"?`<div class="item"><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title)}</a></div>`:`<div class="item"><a href="${esc(l.url)}" download>${esc(l.title)}</a></div>`).join("")}
+function claimBlock(code,email){
+pendingClaim={code:code,email:email};
+return `<div id="dl" style="margin-top:12px"><button class="btn alt" style="width:100%" onclick="claimStored()">Comprobar y descargar</button><p class="note">Si aún no está verificado, vuelve a intentarlo cuando te avisemos.</p></div>`}
+function openClaim(){
+closeAll();$("pay").classList.add("show");
+$("pm").innerHTML=`<h2>Mis descargas</h2><p class="note">Introduce el código de tu pedido y el correo que usaste. Si tu pago ya fue verificado, aparecerán tus enlaces de descarga.</p><input id="cl-code" placeholder="Código (MD-XXXXXX)" value="${esc(orderCode||"")}"><input type="email" id="cl-em" placeholder="Tu correo"><button class="btn alt" style="width:100%" onclick="claimStored()">Comprobar</button><div id="dl"></div>`}
 function done(){const raw=$("em").value;if(!raw.includes("@")){$("em").focus();return}
 const n=orderCode||newOrder(),em=esc(raw);
 saveOrder(raw);
+notifyOrder(raw,n);
 if(lastMethod=="bank"){
-const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
-$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
+const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
+$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
 return}
 if(lastMethod=="crypto"){
-const wa=waLink(`Hola, pagué mi pedido en cripto (Binance).\nPedido: ${n}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
-$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del pago en cripto (Binance) y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
+const wa=waLink(`Hola, pagué mi pedido en cripto (Binance).\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
+$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del pago en cripto (Binance) y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
 return}
-const d=cart.map(i=>B[i][6]?`<div class="item"><a href="books/${B[i][6]}" download>${B[i][0]}</a></div>`:`<div class="item"><span>${B[i][0]}</span><small> en preparación</small></div>`).join("");
-$("pm").innerHTML=`<h2>¡Gracias, compañero/a!</h2><p>Pedido <b>${n}</b> confirmado. Enviaremos tus libros a <b>${em}</b>.</p>${lastMethod=="paypal"?`<p class="note">El pago con PayPal no se verifica automáticamente en un sitio estático; si hubo algún problema, escríbenos.</p>`:lastMethod=="zinli"?`<p class="note">El pago con Zinli es una demo: recibe el importe por «Pide y Recibe» y confirma aquí el pedido. El archivo queda descargable igualmente.</p>`:""}${d?`<p class="sub">Tus descargas:</p>${d}`:""}<button class="btn" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`}
+if(lastMethod=="paypal"||lastMethod=="zinli"){
+$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p class="note">El pago con ${ETIQ[lastMethod]} no se verifica automáticamente en un sitio estático: confirmaremos el cobro y liberaremos tus descargas.</p>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
+return}
+$("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Pedido <b>${n}</b>.</p><p class="note">Modo demostración: la tarjeta no procesa ningún cobro real, así que no hay entrega. Para pagar de verdad usa <b>Pago Móvil</b> o <b>Cripto</b>.</p><button class="btn" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`}
 function addRev(e){e.preventDefault();const n=+$("rs").value;const s=Number.isFinite(n)?Math.min(5,Math.max(1,Math.round(n))):5;
 const nombre=$("rn").value,comentario=$("rt").value;
 if(SB_ON){sbInsert("reviews",{name:nombre,rating:s,comment:comentario,status:"pending"}).then(()=>prependRev(s,comentario,nombre,true)).catch(()=>prependRev(s,comentario,nombre,false));e.target.reset();return}
@@ -191,4 +269,4 @@ const d=document.createElement("div");d.className="q";
 d.innerHTML=`<span class="stars">${"★".repeat(s)}${"☆".repeat(5-s)}</span><br>`;
 const p=document.createElement("span");p.textContent=`“${comentario}” — ${nombre}`+(enviada?" (pendiente de moderación)":"");
 d.appendChild(p);document.querySelector(".rev").prepend(d)}
-hydrate();draw();upd();loadBooks();loadRevs();observeSections();
+hydrate();cart=loadCart();draw();upd();loadBooks();loadRevs();observeSections();

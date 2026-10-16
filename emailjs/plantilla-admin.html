@@ -1,0 +1,65 @@
+<!--
+  =====================================================================
+  EL MORRAL DIGITAL — Plantilla de correo AL ADMINISTRADOR (EmailJS)
+  ---------------------------------------------------------------------
+  Configúrala en el panel de EmailJS (https://dashboard.emailjs.com):
+    · To Email : abogjoseperez014@gmail.com   (o {{admin_email}})
+    · Subject  : Nuevo pedido {{order_code}} — {{metodo}}
+    · Content  : pega TODO lo que va debajo de este comentario.
+  Variables disponibles: {{email}}, {{client_email}}, {{admin_email}},
+    {{order_code}}, {{metodo}}, {{items}}, {{total}}, {{moneda}},
+    {{monto_bs}}, {{tasa_bs}}, {{enlaces}}, {{whatsapp}}.
+  =====================================================================
+-->
+<div style="margin:0;padding:0;background:#f1f0ec;font-family:Arial,Helvetica,sans-serif;color:#1c1c1c">
+  <div style="max-width:600px;margin:0 auto;padding:24px 14px">
+
+    <div style="background:#a30b0b;border-radius:12px 12px 0 0;padding:16px 22px">
+      <div style="color:#ffffff;font-size:20px;font-weight:bold">Nuevo pedido en El Morral Digital</div>
+      <div style="color:#ffd7d7;font-size:13px">Aviso automático del sitio · requiere verificación</div>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid #e0ddd4;border-top:none;border-radius:0 0 12px 12px;padding:20px 22px">
+
+      <table style="width:100%;border-collapse:collapse;font-size:15px">
+        <tr>
+          <td style="padding:6px 0;color:#666">Código</td>
+          <td style="padding:6px 0;text-align:right"><b>{{order_code}}</b></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666">Correo del cliente</td>
+          <td style="padding:6px 0;text-align:right"><a href="mailto:{{client_email}}" style="color:#a30b0b">{{client_email}}</a></td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666">Método de pago</td>
+          <td style="padding:6px 0;text-align:right">{{metodo}}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666;vertical-align:top">Productos</td>
+          <td style="padding:6px 0;text-align:right">{{items}}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666">Total</td>
+          <td style="padding:6px 0;text-align:right"><b>{{total}} {{moneda}}</b></td>
+        </tr>
+        {{#monto_bs}}
+        <tr>
+          <td style="padding:6px 0;color:#666">Monto en Bs</td>
+          <td style="padding:6px 0;text-align:right">{{monto_bs}} <span style="color:#8a8069;font-size:13px">(tasa {{tasa_bs}})</span></td>
+        </tr>
+        {{/monto_bs}}
+      </table>
+
+      <div style="background:#fff3cd;border:1px solid #ffe1a1;border-radius:10px;padding:12px 14px;margin:18px 0;font-size:14px;line-height:1.5">
+        Pedido <b>pendiente de verificación</b>. El cliente enviará el comprobante al
+        WhatsApp <b>+58 426-8901582</b>. Confírmalo antes de marcar el pedido como
+        <b>pagado</b> en el panel de Supabase.
+      </div>
+
+      <p style="margin:18px 0 0;font-size:12px;color:#8a8069;line-height:1.5">
+        Aviso automático de El Morral Digital. Los pedidos se guardan en la tabla
+        <b>orders</b> de Supabase (RLS de solo-INSERT; revísalos en el Table Editor).
+      </p>
+    </div>
+  </div>
+</div>

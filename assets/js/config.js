@@ -20,7 +20,7 @@ window.CFG = {
     nombre: "El Morral",
     acento: "Digital",
     titulo: "El Morral Digital — Libros libres para los pueblos",
-    lema: "Leer es resistir.<br>Un morral lleno de ideas libres.",
+    lema: "<span class=\"resaltado\">Leer es resistir.</span><br>Un morral lleno de ideas libres.",
     intro: "Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, antiimperialista y latinoamericano. Obras de dominio público: sin patentes, sin cercas, para circular entre los pueblos.",
     footer: "★ El Morral Digital · Ideas libres para los pueblos · Obras de dominio público"
   },
@@ -28,7 +28,7 @@ window.CFG = {
   // --------------------------------------------------------- Textos
   textos: {
     catalogoTitulo: "Catálogo libre",
-    catalogoSub: "Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario de $2 USD (Ariel, Facundo, El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo); los demás son enlaces gratuitos a su fuente original.",
+    catalogoSub: "Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario: $1,50 USD por Ariel y Facundo, y $1 USD por El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo; los demás son enlaces gratuitos a su fuente original.",
     catalogoNota: "Nota editorial: solo publicamos obras de dominio público estricto, con archivo y fuente verificados en books/MANIFIESTO.md. Todo título sin archivo y sin fuente comprobable queda retirado del catálogo. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).",
     resenasTitulo: "Voces del morral",
     resenasSub: "Reseñas de lectores · las nuevas se revisan antes de publicarse",
@@ -91,7 +91,25 @@ window.CFG = {
   // La `anonKey` es PÚBLICA (va en el navegador): la protección es la
   // política RLS. NUNCA pongas aquí la `service_role` ni ninguna clave privada.
   supabase: {
-    url: "",            // https://TU-PROYECTO.supabase.co
-    anonKey: ""         // clave anónima pública (NO la service_role)
+    url: "https://uzqadthbjhhdhoqlnupn.supabase.co", // https://TU-PROYECTO.supabase.co
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6cWFkdGhiamhoZGhvcWxudXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDczNDksImV4cCI6MjEwNzcyMzM0OX0.nQNc279PijOU9Bvg5v7232VPaJ_Frb_Oh1l-1smfjIs" // clave anónima pública (NO la service_role)
+  },
+
+  // ------------------------------------------------ Correo (EmailJS)
+  // Envío opcional de correos al cerrar un pedido: un ACUSE + agradecimiento
+  // al cliente (con sus enlaces, si `enviarEnlaces` es true) y un AVISO de
+  // pago al administrador con el tipo de producto solicitado. Crea tus
+  // plantillas en https://dashboard.emailjs.com/ y pega aquí los ID.
+  // Si `publicKey` o `serviceId` quedan vacíos, se desactiva y el sitio
+  // funciona igual. La `publicKey` es PÚBLICA (va en el navegador): protégela
+  // con el «Allowlist» de orígenes en el panel de EmailJS. NUNCA pongas aquí
+  // la clave privada (accessToken) ni ninguna credencial secreta.
+  emailjs: {
+    publicKey: "kTwN8Sthj84cLVIbV", // Public Key de la cuenta (pública)
+    serviceId: "",          // service_xxx (servicio de correo conectado)
+    templateCliente: "",    // plantilla que se envía AL cliente (To Email = {{email}})
+    templateAdmin: "",      // plantilla que te avisa A TI (To Email = tu dirección)
+    adminEmail: "abogjoseperez014@gmail.com", // tu correo de administrador (recibe el aviso de pago)
+    enviarEnlaces: true     // true = el correo al cliente ya lleva sus enlaces de descarga
   }
 };

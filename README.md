@@ -1,17 +1,20 @@
 # El Morral Digital
 
-Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, antiimperialista y latinoamericano. Obras de dominio público, a precio solidario ($1–$2 USD).
+Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, antiimperialista y latinoamericano. Obras de dominio público, a precio solidario ($1–$1,50 USD).
 
 ## Estructura
 - `index.html` – página principal
 - `assets/css/styles.css` – estilos (paleta verde/azul, modo oscuro)
 - `assets/js/config.js` – **configuración central** (textos, colores, secciones, pagos); edita aquí primero
 - `assets/js/data.js` – catálogo (9 campos por fila, ver `AGENTS.md`)
-- `assets/js/app.js` – morral, filtros, pago, descargas y reseñas
-- `books/` – archivos PDF/EPUB
+- `assets/js/app.js` – morral (persistido en `localStorage`), filtros, pago, entrega y reseñas
+- `books/` – documentación (`MANIFIESTO.md`, `LEEME.txt`); los PDF/EPUB de pago ya **no** se publican aquí (van al bucket privado `libros`)
 - `books/MANIFIESTO.md` – registro de dominio público (fuente, licencia, verificación)
+- `emailjs/` – plantillas de correo (cliente y admin) listas para pegar en EmailJS (opcional)
+- `supabase/functions/entregar/` – Edge Function de entrega con URLs firmadas (Fase 2)
 - `db/supabase_pedidos.sql` – esquema SQL para registrar pedidos en Supabase (opcional)
 - `db/supabase_secciones.sql` – esquema SQL para catálogo, reseñas y actividad por sección (opcional)
+- `db/supabase_storage.sql` – crea el bucket privado `libros` para los archivos de pago (opcional)
 - `db/seed_books.sql` – catálogo inicial para la tabla `books` (opcional)
 
 ## Personalizar (sin tocar el código)
@@ -55,11 +58,11 @@ GitHub Pages es un servidor estático: el pago actual es una **demostración**. 
   - `pago.pagomovil` — `banco`, `codigo` (0175 = Banco Digital de los Trabajadores), `telefono`, `cedula`, `titular`, `qr`.
   - `pago.whatsapp` — número destino del comprobante, formato internacional sin `0` (p. ej. `584268901582`).
   - `pago.vesRate` — respaldo si fallan las APIs de tasa (`0` = sin respaldo).
-  La tasa es la **oficial del BCV**, consultada automáticamente vía DolarApi (sin clave y con CORS) con respaldo local. El pedido queda **pendiente de verificación** hasta que confirmes el comprobante; sin backend los PDF siguen siendo públicos por URL.
+  La tasa es la **oficial del BCV**, consultada automáticamente vía DolarApi (sin clave y con CORS) con respaldo local. El pedido queda **pendiente de verificación** hasta que confirmes el comprobante; la entrega es con URLs firmadas (ver «Entrega protegida»).
 - **Stripe Payment Links** o **botones de PayPal**: crea un enlace por libro y colócalo en `app.js` en lugar de `done()`.
 - **Cripto** (ya integrado, cobro manual): la pestaña «Cripto» muestra tu **Binance Pay** (`pago.binance` en `config.js`: `id`, `email`, `tlf` públicos) y el total en USDT (1:1 con USD). Igual que el Pago Móvil, el pedido queda **pendiente de verificación**. Por seguridad solo se publican identificadores públicos (nunca claves privadas, frases semilla ni 2FA). QR opcional en `assets/img/binance-qr.png`.
 - **MercadoPago** (enlaces de pago) para Latinoamérica.
-Para entregar archivos solo tras el pago se necesita un backend (p. ej. Netlify/Vercel Functions o Stripe + webhook); con PayPal.me o Pago Móvil manual no se verifica el cobro.
+Para entregar archivos solo tras el pago, este proyecto usa **Supabase Storage con URLs firmadas** (ver «Entrega protegida» abajo); no hace falta un backend propio. Para cobro *automático* sí se necesita una función serverless con webhook (Stripe/PayPal/MercadoPago).
 
 ## Registrar pedidos con Supabase (opcional)
 Al confirmar un pedido (`done()` en `app.js`), el sitio lo registra en [Supabase](https://supabase.com) vía su API REST (PostgREST), sin librerías ni build. Es opcional: si no lo configuras, todo sigue igual.
@@ -72,6 +75,59 @@ Al confirmar un pedido (`done()` en `app.js`), el sitio lo registra en [Supabase
 3. Cada pedido entra como `pending_review` (el sitio no verifica cobros) con su correo, método de pago y líneas; en Pago Móvil guarda además `monto_bs`/`tasa_bs` con la tasa BCV del momento. Consúltalos en el **Table Editor** de Supabase (o con la `service_role` desde el servidor) y márcalos `paid` cuando confirmes el comprobante.
 
 Seguridad: la `anonKey` es pública por diseño; la protección es la **RLS de solo-INSERT**, y `registrar_pedido` corre como `SECURITY INVOKER` para que esa RLS siga aplicando. En Vercel, el `connect-src` de `vercel.json` ya incluye `https://*.supabase.co`; en GitHub Pages no hay CSP que ajustar.
+
+> Nota: `registrar_pedido` genera el `id` con `gen_random_uuid()` y **no** usa `insert ... returning`; eso exigiría una política SELECT para `anon`, que no existe a propósito (protege la PII del correo).
+
+## Entrega protegida (Fase 2)
+Los PDF/EPUB de pago **no** se publican en el repo. Viven en un **bucket privado** `libros` de Supabase Storage y se entregan con **URLs firmadas temporales** (~1 h) solo cuando el pedido está `paid`. Sin `service_role` en el navegador.
+
+1. **Crea el bucket**: ejecuta `db/supabase_storage.sql` en el SQL Editor (crea `libros` privado, sin políticas para `anon`).
+2. **Sube los archivos** a `libros`. Tres opciones:
+   - **Script incluido** (más fácil): con tu `service_role` en el entorno, ejecuta `db/subir_libros.sh`:
+     ```bash
+     SUPABASE_URL="https://TU-PROYECTO.supabase.co" \
+     SUPABASE_SERVICE_ROLE_KEY="eyJ..." ./db/subir_libros.sh
+     ```
+   - **Panel**: *Storage → libros → Upload* (arrastra y suelta los 6 archivos).
+   - **CLI**: `supabase storage cp books/ariel.pdf ss:///libros/ariel.pdf`.
+   Sube cada campo `archivo` de `data.js` (y `file` de la tabla `books`) con el mismo nombre. Los archivos locales se quedan en tu equipo para subirlos, pero **no se versionan** (`.gitignore`).
+3. **Despliega la Edge Function**:
+   ```bash
+   supabase functions deploy entregar
+   ```
+   Usa la `service_role` que Supabase inyecta como variable de entorno; **nunca** se expone al navegador. Código en `supabase/functions/entregar/index.ts`.
+4. **Verifica el pago**: en el Table Editor de Supabase cambia el pedido de `pending_review` a `paid`. A partir de ahí el cliente reclama.
+5. **Reclamo del cliente**: en el sitio, tras confirmar el pedido (`done()`) aparece **«Comprobar y descargar»**; y siempre desde el botón **Mis descargas** del menú, introduciendo el **código de pedido** + su **correo**. `claim()` llama a la Edge Function `entregar`, que valida código + correo + estado `paid` y devuelve las URLs firmadas.
+
+Seguridad: la Edge Function corre con `verify_jwt=true` (la `anonKey` es un JWT válido) y exige que el correo coincida con el del pedido, para no exponer descargas a quien solo adivine el código. Los enlaces caducan (~1 h); el cliente puede volver a generarlos desde «Mis descargas».
+
+## Correos con EmailJS (opcional)
+Al confirmar un pedido, el sitio puede enviar **dos correos** con [EmailJS](https://www.emailjs.com): un **acuse + agradecimiento al cliente** (con las instrucciones para reclamar sus descargas en «Mis descargas», si `enviarEnlaces` es `true`) y un **aviso de pago al administrador** con el tipo de producto pedido. Se hace con un `POST` JSON a `https://api.emailjs.com/api/v1.0/email/send`, **sin librerías**, igual que la tasa del BCV y Supabase. Si `publicKey`/`serviceId` están vacíos, se desactiva y el sitio funciona igual.
+
+1. **Crea la cuenta y conecta el servicio**: en [dashboard.emailjs.com](https://dashboard.emailjs.com) añade un *Email Service* (Gmail/Outlook/SMTP…). Copia su **Service ID** (`service_xxx`).
+2. **Crea dos plantillas** (*Email Templates*): el cuerpo listo para pegar está en `emailjs/plantilla-cliente.html` y `emailjs/plantilla-admin.html` (ver `emailjs/README.md`).
+   - **Al cliente** (`templateCliente`): en el campo **To Email** pon `{{email}}` (destinatario dinámico). Usa las variables de abajo. Si quieres HTML sin escapar, usa llaves triples (`{{{enlaces}}}`).
+   - **Al administrador** (`templateAdmin`): en **To Email** pon tu correo (o `{{admin_email}}`).
+3. **Rellena `emailjs` en `assets/js/config.js`**: `publicKey` (Public Key de la cuenta), `serviceId`, `templateCliente`, `templateAdmin`, `adminEmail` y `enviarEnlaces`.
+4. **Limita el origen**: en el panel de EmailJS activa el *Allowlist* (p. ej. `https://1956jp.github.io`, el dominio de Vercel y `http://localhost:8000`) para que solo tu sitio pueda usar la Public Key.
+
+Variables disponibles en las plantillas (todas las recibe cada correo):
+
+| Variable | Contenido |
+| --- | --- |
+| `{{email}}` / `{{client_email}}` | Correo del cliente (To Email del correo al cliente) |
+| `{{admin_email}}` | Correo del administrador |
+| `{{order_code}}` | Código del pedido (p. ej. `MD-AB12CD`) |
+| `{{metodo}}` | Método de pago (Tarjeta, PayPal, Pago Móvil, Cripto…) |
+| `{{items}}` | Lista de títulos separados por comas |
+| `{{total}}` / `{{moneda}}` | Importe (`$12.00`) y divisa (`USD`) |
+| `{{monto_bs}}` / `{{tasa_bs}}` | Monto en Bs y tasa BCV (solo Pago Móvil) |
+| `{{enlaces}}` | Instrucciones HTML para reclamar las descargas en «Mis descargas» (vacío si `enviarEnlaces` es `false`) |
+| `{{whatsapp}}` | Enlace `wa.me` para enviar el comprobante del pedido por WhatsApp |
+
+> **Límite importante:** el sitio es estático y **no verifica cobros**; los archivos de pago viven en el bucket privado `libros`. El correo **no adjunta archivos**: con `enviarEnlaces: true` incluye las instrucciones para reclamar en «Mis descargas»; con `false` solo el acuse. La entrega real (URLs firmadas) la controla el estado `paid` del pedido. EmailJS limita a **1 envío por segundo**: el código separa los dos correos ~1 s.
+
+Seguridad: la **Public Key** es pública (va en el navegador); la protección es el *Allowlist* de orígenes. **Nunca** pongas en `config.js` la clave privada (`accessToken`). En Vercel, el `connect-src` de `vercel.json` ya incluye `https://api.emailjs.com`; en GitHub Pages no hay CSP que ajustar.
 
 ## Catálogo, reseñas y actividad con Supabase (opcional)
 Con el **mismo** `supabase` de `config.js` que los pedidos, el sitio puede sincronizar tres secciones. Si `url`/`anonKey` están vacíos, todo usa los datos locales (`data.js` y las reseñas de ejemplo) y el sitio funciona igual.
