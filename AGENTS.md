@@ -4,10 +4,12 @@ Estático de GitHub Pages: `index.html` + CSS + JS vanila. **No hay package.json
 
 ## Previsualización
 ```bash
-./servir.sh                    # red local con prefijo de proyecto → http://IP:8000/morral-digital/
+./servir.sh                    # prefijo de proyecto → http://localhost:8000/morral-digital/ (binde 127.0.0.1)
+./servir.sh 8000 0.0.0.0       # expuesto en la LAN (solo redes de confianza)
 python3 -m http.server 8000    # desde la raíz del repo → http://localhost:8000
 node --check assets/js/*.js     # única comprobación automatizable
 ```
+`servir.sh` **bloquea dotfiles** (`.git`, `.env`…) y **no lista directorios**; no lo sustituyas por uno que los exponga.
 Comprobar a mano: filtros, añadir/quitar del morral, checkout con enlaces de descarga, pestaña **Pago Móvil** (datos, monto en Bs, copiar, WhatsApp), libros de enlace gratuito y formulario de reseñas.
 
 ## Estructura que no se ve en los nombres
@@ -43,10 +45,24 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 ## Pago Móvianual, sin backend)
 - Config en `assets/js/config.js` → `pago`: `pagomovil` (banco/código/teléfono/cédula/titular/qr), `whatsapp` (internacional, sin `0`), `vesRate` (respaldo si fallan las APIs). En `app.js` se leen como `PAGOMOVIL`, `WHATSAPP`, `VES_RATE`, `QR_PM` (con respaldo por defecto).
 - La tasa USD→VES es la **oficial del BCV**, obtenida en `getRate()` con `fetch` a DolarApi (`ve.dolarapi.com/v1/dolares/oficial`, y como respaldo el listado `/v1/dolares` filtrando `fuente=="oficial"`); si fallan, usa `VES_RATE` o muestra «tasa no disponible». Se cachea en `rateCache`.
-- Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. El resto (carrito, reseñas) sigue solo en memoria.
+- Es la **única excepción deliberada** a la regla «sin `fetch`» del proyecto: es una consulta pública sin secretos y con respaldo local. La única otra llamada de red es `saveOrder()` a Supabase (ver abajo). El resto (carrito, reseñas) sigue solo en memoria.
 - `orderCode` se genera una vez en `checkout()` (`newOrder()`), para que el concepto no cambie al alternar pestañas.
 - `method("bank")` pinta datos + monto en Bs + concepto + botones copiar (`copyText`) + botón WhatsApp; llama a `fillBank()` para rellenar la tasa/monto/`href` de forma asíncrona. `done()` con `lastMethod=="bank"` muestra el pedido **pendiente de verificación** y **no** ofrece descargas.
 - Los PDF siguen siendo públicos por URL: la «verificación» es por honor hasta tener backend.
+
+## Registro de pedidos (Supabase, opcional)
+- `done()` llama a `saveOrder(correo, estado)` que hace un `POST` a PostgREST (`{url}/rest/v1/{tabla}`) con cabeceras `apikey`/`Authorization: Bearer {anonKey}` y `Prefer: return=minimal`. Sin librería, mismo estilo que `getRate()`.
+- Config en `config.js` → `supabase{url, anonKey, tabla}`. Vacío = desactivado (`SB_ON=false`), el sitio funciona igual. Constantes `SB`, `SB_URL`, `SB_KEY`, `SB_TABLA`, `SB_ON` en `app.js`.
+- La `anonKey` es **pública** (va en el navegador). La seguridad es una **política RLS de solo-`INSERT`**: `anon` no puede leer los pedidos (protege la PII). NUNCA poner la `service_role`. SQL y detalles en `README.md`.
+- Estado guardado: `pendiente` (Pago Móvil/Cripto) o `demo` (resto); en Pago Móvil añade `monto_bs`/`tasa_bs` desde `rateCache`. Es best-effort: `saveOrder()` traga errores y no bloquea la confirmación.
+- En Vercel, `connect-src` de `vercel.json` incluye `https://*.supabase.co`. En GitHub Pages no hay CSP que ajustar.
+
+## Seguridad y despliegue
+- **GitHub Pages** (sitio de proyecto `/morral-digital/`) no permite cabeceras HTTP propias. **Vercel** sí: `vercel.json` añade CSP y cabeceras de seguridad (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `COOP`). En Vercel el sitio se sirve en la **raíz** (rutas relativas → funciona igual). Sin build: framework Other, output `.`.
+- La CSP necesita `'unsafe-inline'` en `script-src`/`style-src` porque `app.js` genera HTML con `onclick`/`style` en línea. Para una CSP estricta, moverlos a `addEventListener`/clases.
+- `index.html` lleva `<meta name="referrer" content="no-referrer">` (mínimo común donde no hay cabeceras).
+- Repo **público**: la PII de cobro (cédula/teléfono/correo/Binance) es visible y la cédula es **necesaria** para el Pago Móvil. Nunca subir claves privadas, semillas, 2FA ni tokens. `.gitignore` cubre `.env`, `*.pem`, `*.token`, `gh_token`, `.vercel/`, capturas.
+- En GitHub, activar *Secret scanning* y *Dependabot* (*Settings → Code security*). Rotar tokens filtrados.
 
 ## Gotchas
 - El morral guarda **índices de `B`** (`add(i)`/`rm(i)`), no identificadores: insertar filas en medio recoloca los carritos activos.

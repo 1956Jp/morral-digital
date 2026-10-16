@@ -80,5 +80,16 @@ window.CFG = {
       tlf: "04268901582",
       qr: "assets/img/binance-qr.png"     // opcional
     }
+  },
+
+  // ------------------------------------------------ Pedidos (Supabase)
+  // Registro opcional de pedidos. Si `url` o `anonKey` quedan vacíos, se
+  // desactiva y el sitio funciona igual. La `anonKey` es PÚBLICA (va en el
+  // navegador): protégela con una política RLS de solo-INSERT en la tabla
+  // (ver README). NUNCA pongas aquí la `service_role` ni ninguna clave privada.
+  supabase: {
+    url: "",            // https://TU-PROYECTO.supabase.co
+    anonKey: "",        // clave anónima pública (NO la service_role)
+    tabla: "pedidos"
   }
 };

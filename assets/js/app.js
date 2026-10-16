@@ -19,6 +19,10 @@ const QR_PM=PAGOMOVIL.qr||"";                 // QR opcional del banco
 // Cripto (cobro manual por Binance Pay). Solo identificadores PÚBLICOS; nunca claves privadas.
 const BINANCE=Object.assign({id:"",email:"",tlf:"",qr:""},_pago.binance||{});
 const QR_CRYPTO=BINANCE.qr||"";               // QR opcional de Binance Pay
+// Supabase: registro opcional de pedidos (ver config.js y README). anonKey es PÚBLICA.
+const SB=CFG.supabase||{};
+const SB_URL=(SB.url||"").replace(/\/+$/,""),SB_KEY=SB.anonKey||"",SB_TABLA=SB.tabla||"pedidos";
+const SB_ON=!!(SB_URL&&SB_KEY);
 // Textos y etiquetas editables desde config.js
 const TXT=Object.assign({botonComprar:"COMPRAR",botonGratis:"Leer gratis",etiquetaMorral:"Añadir al morral",morralTitulo:"Tu morral"},_textos);
 const ETIQ=Object.assign({card:"Tarjeta",paypal:"PayPal",bank:"Pago Móvil",crypto:"Cripto",zinli:"Zinli"},CFG.etiquetasPago||{});
@@ -53,6 +57,14 @@ wa.href=waLink(`Hola, envío mi comprobante de Pago Móvil.\nPedido: ${orderCode
 function fillCrypto(){
 const wa=document.getElementById("pm-wa");if(!wa)return;
 wa.href=waLink(`Hola, envío mi comprobante de pago en cripto.\nPedido: ${orderCode}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`)}
+// Registra el pedido en Supabase (REST/PostgREST, sin librerías). Silencioso: si
+// falla o no hay config, no rompe la confirmación. La tabla debe tener RLS de solo-INSERT.
+async function saveOrder(correo,estado){
+if(!SB_ON||!orderCode)return;
+const info=rateCache,usd=total();
+const row={codigo:orderCode,correo:String(correo||""),metodo:lastMethod,libros:cart.map(i=>B[i][0]),total_usd:+usd.toFixed(2),estado,fecha:new Date().toISOString()};
+if(lastMethod=="bank"){row.tasa_bs=info?+info.rate.toFixed(4):null;row.monto_bs=info?+toBs(usd,info.rate).toFixed(2):null}
+try{await fetch(`${SB_URL}/rest/v1/${SB_TABLA}`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(row)})}catch(e){}}
 // ==== Hidratación desde config.js: textos, colores y secciones visibles ====
 function applyTheme(){const c=CFG.colores||{},map={bg:"--bg",card:"--card",ink:"--ink",mut:"--mut",red:"--red",gold:"--gold",green:"--green",line:"--line"};for(const k in map){if(c[k])document.documentElement.style.setProperty(map[k],c[k])}}
 function toggleSections(){const s=CFG.secciones||{};["catalogo","resenas","expansion"].forEach(k=>{const sec=document.getElementById(k);if(sec)sec.style.display=(s[k]===false)?"none":""})}
@@ -104,8 +116,9 @@ $("pm").innerHTML=`<h2>Pagar ${f(total())}</h2><div class="tabs">${METODOS.map(k
 <button class="btn alt" style="width:100%" onclick="done()">${(m=="bank"||m=="crypto")?"Ya pagué, enviar comprobante":(m=="paypal"||m=="zinli"?"Ya pagué, mostrar descargas":"Confirmar pago")}</button>
 ${(m=="bank"||m=="crypto")?`<a class="btn wa" id="pm-wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:10px" href="${waLink("Hola, quiero pagar el pedido "+orderCode)}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Cobro manual: tu pedido queda <b>pendiente de verificación</b> hasta confirmar el comprobante.</p>`:`<p class="note" style="margin-top:12px">Modo demostración: no se procesa ningún cobro real. El pago con PayPal abre paypal.me/${PAYPAL_USER}; para entregar los archivos solo tras el cobro hace falta un servidor propio (webhook).</p>`}`;
 if(m=="bank")fillBank();else if(m=="crypto")fillCrypto()}
-function done(){if(!$("em").value.includes("@")){$("em").focus();return}
-const n=orderCode||newOrder(),em=esc($("em").value);
+function done(){const raw=$("em").value;if(!raw.includes("@")){$("em").focus();return}
+const n=orderCode||newOrder(),em=esc(raw);
+saveOrder(raw,(lastMethod=="bank"||lastMethod=="crypto")?"pendiente":"demo");
 if(lastMethod=="bank"){
 const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cart.map(i=>B[i][0]).join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
 $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a><p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
@@ -116,7 +129,7 @@ $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido
 return}
 const d=cart.map(i=>B[i][6]?`<div class="item"><a href="books/${B[i][6]}" download>${B[i][0]}</a></div>`:`<div class="item"><span>${B[i][0]}</span><small> en preparación</small></div>`).join("");
 $("pm").innerHTML=`<h2>¡Gracias, compañero/a!</h2><p>Pedido <b>${n}</b> confirmado. Enviaremos tus libros a <b>${em}</b>.</p>${lastMethod=="paypal"?`<p class="note">El pago con PayPal no se verifica automáticamente en un sitio estático; si hubo algún problema, escríbenos.</p>`:lastMethod=="zinli"?`<p class="note">El pago con Zinli es una demo: recibe el importe por «Pide y Recibe» y confirma aquí el pedido. El archivo queda descargable igualmente.</p>`:""}${d?`<p class="sub">Tus descargas:</p>${d}`:""}<button class="btn" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`}
-function addRev(e){e.preventDefault();const s=+$("rs").value;
+function addRev(e){e.preventDefault();const n=+$("rs").value;const s=Number.isFinite(n)?Math.min(5,Math.max(1,Math.round(n))):5;
 const d=document.createElement("div");d.className="q";d.innerHTML=`<span class="stars">${"★".repeat(s)}${"☆".repeat(5-s)}</span><br>`;
 const p=document.createElement("span");p.textContent=`“${$("rt").value}” — ${$("rn").value}`;d.appendChild(p);
 document.querySelector(".rev").prepend(d);e.target.reset()}

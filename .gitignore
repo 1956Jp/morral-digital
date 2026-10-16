@@ -1,0 +1,22 @@
+# Secretos y credenciales
+.env
+.env.*
+*.pem
+*.key
+*.token
+gh_token
+.gh_token
+
+# Capturas / pruebas locales
+morral-ejecucion/
+*.webm
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Vercel
+.vercel/
