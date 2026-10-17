@@ -27,6 +27,7 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 - Desplegado como sitio de proyecto en `/morral-digital/`: **todas las rutas deben ser relativas** (hoy hay 0 rutas raíz `/assets/...`). Mantener `.nojekyll`.
 - `books/MANIFIESTO.md` es el registro de dominio público: fuente, licencia y fecha de verificación por título. Nada se publica sin su fila ahí.
 - `supabase/functions/entregar/index.ts` es la Edge Function de entrega (Fase 2); `db/supabase_storage.sql` crea el bucket privado `libros`. Los PDF/EPUB de pago **no** van en `books/` (repo público): viven en ese bucket y se sirven con URLs firmadas.
+- `docs/ESTRUCTURA.md` (mapa frontend/backend/infra/docs y flujo de datos) y `docs/RESULTADOS.md` (informe de resultados y seguimiento) resumen el reparto de archivos; la verificación de pedidos se administra por WhatsApp (cliente manda el comprobante → el admin marca `paid`).
 
 ## Filas del catálogo (`assets/js/data.js`)
 9 campos por fila, **array posicional, sin id**:
