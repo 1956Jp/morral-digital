@@ -10,6 +10,7 @@ gh_token
 # Capturas / pruebas locales
 morral-ejecucion/
 *.webm
+.playwright-cli/
 
 # Sistema / editor
 .DS_Store

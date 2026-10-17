@@ -1,8 +1,8 @@
 # Resultados y seguimiento — El Morral Digital
 
 Informe de estado del trabajo. La administración de pedidos se gestiona
-**desde WhatsApp** (ver `docs/ESTRUCTURA.md` §6). Última actualización: sesión
-de Fase 2.
+**desde WhatsApp** (ver `docs/ESTRUCTURA.md` §6). Última actualización: Fase 2
++ endurecimiento de pedidos y limpieza de duplicados.
 
 ## 1. Resumen por fase
 
@@ -32,7 +32,11 @@ de Fase 2.
 - **Reconciliación de git.** Se fusionó el `origin/main` divergente (subidas
   manuales por la web) conservando la versión local y eliminando duplicados
   (`drago-caso-venezuela.pdf` y 3 `.sql` en la raíz).
-- **Correo.** `sendMail()` ahora registra errores de EmailJS. Assets a `?v=20`.
+- **Correo.** `sendMail()` registra errores de EmailJS; `config.js` deja marcas
+  `TODO` donde van los 3 ID.
+- **Endurecimiento de pedidos.** Se asegura `orderCode` antes de guardar y se
+  capturan las promesas de `saveOrder`/`notifyOrder`.
+- **Limpieza.** Se eliminó un `index.ts` duplicado subido a la raíz; assets a `?v=23`.
 
 ## 3. Pendiente / bloqueos
 
