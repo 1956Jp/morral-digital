@@ -245,9 +245,9 @@ function openClaim(){
 closeAll();$("pay").classList.add("show");
 $("pm").innerHTML=`<h2>Mis descargas</h2><p class="note">Introduce el código de tu pedido y el correo que usaste. Si tu pago ya fue verificado, aparecerán tus enlaces de descarga.</p><input id="cl-code" placeholder="Código (MD-XXXXXX)" value="${esc(orderCode||"")}"><input type="email" id="cl-em" placeholder="Tu correo"><button class="btn alt" style="width:100%" onclick="claimStored()">Comprobar</button><div id="dl"></div>`}
 function done(){const raw=$("em").value;if(!raw.includes("@")){$("em").focus();return}
-const n=orderCode||newOrder(),em=esc(raw);
-saveOrder(raw);
-notifyOrder(raw,n);
+const n=orderCode=orderCode||newOrder(),em=esc(raw);
+saveOrder(raw).catch(()=>{});
+notifyOrder(raw,n).catch(()=>{});
 if(lastMethod=="bank"){
 const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
 $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;

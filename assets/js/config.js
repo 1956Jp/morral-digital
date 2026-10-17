@@ -110,6 +110,6 @@ window.CFG = {
     templateCliente: "",    // plantilla que se envía AL cliente (To Email = {{email}})
     templateAdmin: "",      // plantilla que te avisa A TI (To Email = tu dirección)
     adminEmail: "abogjoseperez014@gmail.com", // tu correo de administrador (recibe el aviso de pago)
-    enviarEnlaces: true     // true = el correo al cliente ya lleva sus enlaces de descarga
+    enviarEnlaces: true     // true = el correo al cliente incluye instrucciones para reclamar en «Mis descargas»
   }
 };
