@@ -30,7 +30,7 @@ window.CFG = {
     catalogoTitulo: "Catálogo libre",
     catalogoSub: "Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario: $1,50 USD por Ariel y Facundo, y $1 USD por El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo; los demás son enlaces gratuitos a su fuente original.",
     catalogoNota: "Nota editorial: solo publicamos obras de dominio público estricto, con archivo y fuente verificados en books/MANIFIESTO.md. Todo título sin archivo y sin fuente comprobable queda retirado del catálogo. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).",
-    resenasTitulo: "Voces del morral",
+    resenasTitulo: "Voces contestataria, e insurgentes con morral",
     resenasSub: "Reseñas de lectores · las nuevas se revisan antes de publicarse",
     expansionTitulo: "Hoja de ruta",
     expansionSub: "Así crecerá el Morral",
@@ -105,10 +105,12 @@ window.CFG = {
   // con el «Allowlist» de orígenes en el panel de EmailJS. NUNCA pongas aquí
   // la clave privada (accessToken) ni ninguna credencial secreta.
   emailjs: {
+    // MODO TEST: deja estos 3 campos vacíos y todo sigue desactivado.
+    // Para activarlos: pega aquí abajo los ID reales de tu dashboard.
     publicKey: "kTwN8Sthj84cLVIbV", // Public Key de la cuenta (pública)
-    serviceId: "",          // service_xxx (servicio de correo conectado)
-    templateCliente: "",    // plantilla que se envía AL cliente (To Email = {{email}})
-    templateAdmin: "",      // plantilla que te avisa A TI (To Email = tu dirección)
+    serviceId: "",          // TODO → pega el Service ID (service_xxx)
+    templateCliente: "",    // TODO → pega el Template ID del acuse al cliente (tpl_xxx)
+    templateAdmin: "",      // TODO → pega el Template ID del aviso a ti (tpl_xxx)
     adminEmail: "abogjoseperez014@gmail.com", // tu correo de administrador (recibe el aviso de pago)
     enviarEnlaces: true     // true = el correo al cliente incluye instrucciones para reclamar en «Mis descargas»
   }
