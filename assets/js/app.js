@@ -291,11 +291,11 @@ const n=orderCode=orderCode||newOrder(),em=esc(raw);
 saveOrder(raw).catch(()=>{});
 notifyOrder(raw,n).catch(()=>{});
 if(lastMethod=="bank"){
-const wa=waLink(`Hola, pagué por Pago Móvil.\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
+const wa=waLink(`Hola, envío mi comprobante de Pago Móvil.\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())}\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
 $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del Pago Móvil y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
 return}
 if(lastMethod=="crypto"){
-const wa=waLink(`Hola, pagué mi pedido en cripto (Binance).\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
+const wa=waLink(`Hola, envío mi comprobante de pago en cripto (Binance).\nPedido: ${n}\nLibros: ${cartTitles().join(", ")}\nTotal: ${f(total())} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
 $("pm").innerHTML=`<h2>Pedido registrado</h2><p>Gracias, compañero/a. Tu pedido <b>${n}</b> quedó <b>pendiente de verificación</b>.</p><p>Envía el comprobante del pago en cripto (Binance) y confirmaremos tu pago antes de liberar las descargas.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${claimBlock(n,raw)}<p class="note" style="margin-top:12px">Te contactaremos en <b>${em}</b>. Guarda tu código de pedido: <b>${n}</b>.</p><button class="btn" style="margin-top:10px" onclick="cart=[];upd();closeAll()">Seguir leyendo</button>`;
 return}
 if(lastMethod=="paypal"||lastMethod=="zinli"){
