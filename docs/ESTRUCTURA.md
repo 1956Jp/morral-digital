@@ -11,7 +11,7 @@ build, ni `package.json`, ni tests automatizados. "Backend" aquí significa
 | `index.html` | Marcado de la página: barra de navegación, hero, secciones (catálogo, reseñas, expansión), modales de morral y pago. Carga `config.js` → `data.js` → `app.js` como scripts clásicos. |
 | `assets/css/styles.css` | Estilos, variables de color (`--bg`, `--card`, `--ink`, `--gold`, `--pollo`, `--sangre`…) y modo oscuro. |
 | `assets/js/config.js` | Configuración central `CFG`: marca, textos, colores, secciones, métodos de pago, datos de cobro (`pago`), Supabase y EmailJS. |
-| `assets/js/data.js` | Catálogo **semilla** `B`: 19 filas posicionales de 9 campos. Respaldo si Supabase no responde. |
+| `assets/js/data.js` | Catálogo **semilla** `B`: 24 filas posicionales de 9 campos. Respaldo si Supabase no responde. |
 | `assets/js/app.js` | Lógica: filtros, morral persistente (`localStorage`), checkout, descargas gratuitas (`freeBook`/`freeSend`), reclamo de descargas (`claim`), helpers de Supabase (`sbGet`/`sbInsert`), `saveOrder`/`saveSolicitud`, `notifyOrder`/`notifyFree` (EmailJS). |
 
 ## 2. Backend (Supabase + entrega protegida)

@@ -51,12 +51,17 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 | La República | Platón | 347 a.C. | — | Clásico | — (enlace) | archive.org/details/HCO191 — trad. José Tomás y García, 1805 (2 tomos: HCO191/2) | Dominio público | 2026-10-18 |
 | La Eneida | Virgilio | 19 a.C. | — | Clásico | — (enlace) | archive.org/details/A086C074 — trad. Juan de Enciso y Monzón, 1698 | Dominio público | 2026-10-18 |
 | Banquete, Hipias Mayor y Fedro | Platón | 347 a.C. | — | Clásico | — (enlace) | archive.org/details/banquete-hipias-mayor-fedro — trad. clásica, 1891 | Dominio público | 2026-10-18 |
+| Manifiesto del Partido Comunista | Karl Marx y Friedrich Engels | 1883 / 1895 | 1953 / 1965 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1840s/48-manif.htm — marxists.org (trad. histórica al español) | Dominio público | 2026-10-18 |
+| El Capital | Karl Marx | 1883 | 1953 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/capital/karl-marx-el-capital-tomo-i-editorial-progreso.pdf — marxists.org — Editorial Progreso (PDF, Tomo I) | Dominio público | 2026-10-18 |
+| La ideología alemana | Karl Marx y Friedrich Engels | 1883 / 1895 | 1953 / 1965 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1846/ideoalemana/index.htm — escrita 1845-46, publicada en 1932; marxists.org | Dominio público | 2026-10-18 |
+| El origen de la familia, la propiedad privada y el Estado | Friedrich Engels | 1895 | 1965 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1880s/origen/index.htm — marxists.org (trad. histórica al español) | Dominio público | 2026-10-18 |
+| Trabajo asalariado y capital | Karl Marx | 1883 | 1953 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1840s/49-trab2.htm — marxists.org (trad. histórica al español) | Dominio público | 2026-10-18 |
 
-> El catálogo publica **19 títulos**: 6 con archivo hospedado y verificado en
+> El catálogo publica **24 títulos**: 6 con archivo hospedado y verificado en
 > `books/` (**Ariel**, **Facundo**, **El porvenir de la América Latina** —
 > Sempere, pre-1930 —, **La República Argentina y el caso de Venezuela** —
 > ed. 1903 —, **Noli me tángere** y **El Filibusterismo** — Gutenberg, notas de
-> Sempau †1909 —) y 13 que son solo enlace a su fuente original. Las fichas
+> Sempau †1909 —) y 18 que son solo enlace a su fuente original. Las fichas
 > marcadas «— (enlace)» se publican con `precio = 0` (botón "Leer gratis")
 > porque no se aloja PDF local. Todo título **sin archivo y sin fuente
 > verificable** está retirado del catálogo (ver abajo) hasta que se compruebe

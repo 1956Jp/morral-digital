@@ -69,7 +69,22 @@ values
    '', 'https://archive.org/details/A086C074', 'Dominio público', 17, true),
   ('Banquete, Hipias Mayor y Fedro', 'Platón', 'Clásico', 0, '#9c7a34',
    'Tres diálogos sobre el amor, la belleza y la retórica; traducción clásica (1891). Texto libre.',
-   '', 'https://archive.org/details/banquete-hipias-mayor-fedro', 'Dominio público', 18, true)
+   '', 'https://archive.org/details/banquete-hipias-mayor-fedro', 'Dominio público', 18, true),
+  ('Manifiesto del Partido Comunista', 'Karl Marx y Friedrich Engels', 'Marxista', 0, '#a31621',
+   'El programa fundacional del comunismo moderno: la historia como lucha de clases y el llamamiento «¡Proletarios de todos los países, uníos!» (Londres, 1848).',
+   '', 'https://www.marxists.org/espanol/m-e/1840s/48-manif.htm', 'Dominio público', 19, true),
+  ('El Capital', 'Karl Marx', 'Marxista', 0, '#8c1c13',
+   'Crítica de la economía política: mercancía, plusvalía y acumulación en el Tomo I, «El proceso de producción del capital» (Hamburgo, 1867).',
+   '', 'https://www.marxists.org/espanol/m-e/capital/karl-marx-el-capital-tomo-i-editorial-progreso.pdf', 'Dominio público', 20, true),
+  ('La ideología alemana', 'Karl Marx y Friedrich Engels', 'Marxista', 0, '#b23a2f',
+   'Crítica de la filosofía alemana (Feuerbach, Bauer, Stirner) donde se formula la concepción materialista de la historia (escrita 1845-46, publicada en 1932).',
+   '', 'https://www.marxists.org/espanol/m-e/1846/ideoalemana/index.htm', 'Dominio público', 21, true),
+  ('El origen de la familia, la propiedad privada y el Estado', 'Friedrich Engels', 'Marxista', 0, '#7d1f1a',
+   'Estudio materialista del surgimiento de la familia, la propiedad privada y el Estado a partir de las investigaciones de Lewis H. Morgan (Zúrich, 1884).',
+   '', 'https://www.marxists.org/espanol/m-e/1880s/origen/index.htm', 'Dominio público', 22, true),
+  ('Trabajo asalariado y capital', 'Karl Marx', 'Marxista', 0, '#9e2a2b',
+   'Exposición divulgativa, basada en conferencias de 1847, sobre la explotación de la fuerza de trabajo y la relación entre capital y trabajo (1849).',
+   '', 'https://www.marxists.org/espanol/m-e/1840s/49-trab2.htm', 'Dominio público', 23, true)
 on conflict (title) do update set
   author = excluded.author,
   corriente = excluded.corriente,
