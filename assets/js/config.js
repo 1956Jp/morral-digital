@@ -64,7 +64,9 @@ window.CFG = {
     paypal: "morraldigital",        // usuario de paypal.me
     zinli: "",                      // teléfono «Pide y Recibe» (opcional)
     whatsapp: "584268901582",       // internacional, sin el 0 inicial
-    vesRate: 0,                     // respaldo de tasa Bs/USD si fallan las APIs (0 = sin respaldo)
+    vesRate: 0,                     // respaldo manual de tasa Bs/USD si falla el BCV (0 = sin respaldo)
+    vesRateMin: 1,                  // rango de cordura: se ignoran tasas del BCV fuera de [min, max]
+    vesRateMax: 10000000,
     pagomovil: {
       banco: "Banco Mercantil",
       codigo: "0105",

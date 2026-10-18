@@ -15,7 +15,8 @@ const paypalLink=a=>`https://paypal.me/${PAYPAL_USER}/${a.toFixed(2)}USD`;
 // Pago Móvil (manual, sin backend): datos del cobro y destino del comprobante
 const PAGOMOVIL=Object.assign({banco:"Banco Mercantil",codigo:"0105",telefono:"04268901582",cedula:"V-5249473",titular:"Jose de Los Santos Perez Lopez",qr:"assets/img/pagomovil-qr.png"},_pago.pagomovil||{});
 const WHATSAPP=_pago.whatsapp||"584268901582"; // internacional, sin el 0 inicial
-const VES_RATE=_pago.vesRate||0;              // respaldo si fallan las APIs de tasa (0 = sin respaldo)
+const VES_RATE=_pago.vesRate||0;              // respaldo manual si fallan las APIs de tasa (0 = sin respaldo)
+const RATE_MIN=+(_pago.vesRateMin||1),RATE_MAX=+(_pago.vesRateMax||10000000); // rango de cordura Bs/USD
 const QR_PM=PAGOMOVIL.qr||"";                 // QR opcional del banco
 // Cripto (cobro manual por Binance Pay). Solo identificadores PÚBLICOS; nunca claves privadas.
 const BINANCE=Object.assign({id:"",email:"",tlf:"",qr:""},_pago.binance||{});
@@ -55,11 +56,15 @@ function saveCart(){try{localStorage.setItem(CART_KEY,JSON.stringify(cart))}catc
 function loadCart(){try{const a=JSON.parse(localStorage.getItem(CART_KEY)||"[]");return Array.isArray(a)?a.filter(k=>typeof k==="string"&&rowOf(k)):[]}catch(e){return[]}}
 async function getRate(){
 if(rateCache)return rateCache;
+// Solo se acepta la tasa OFICIAL del BCV. Se descartan las respuestas fuera del
+// rango de cordura [RATE_MIN, RATE_MAX] (tasas anómalas del proveedor) en vez de
+// mostrarlas. Si ninguna fuente válida responde, usa el respaldo manual o null.
+const ok=r=>Number.isFinite(r)&&r>=RATE_MIN&&r<=RATE_MAX;
 const cands=[
 {url:"https://ve.dolarapi.com/v1/dolares/oficial",fuente:"BCV (oficial)",pick:d=>d.promedio||d.venta||d.compra,fecha:d=>(d.fechaActualizacion||"").slice(0,10)},
 {url:"https://ve.dolarapi.com/v1/dolares",fuente:"BCV (oficial)",pick:d=>{const o=Array.isArray(d)?d.find(x=>x.fuente=="oficial"):null;return o&&(o.promedio||o.venta)},fecha:d=>{const o=Array.isArray(d)?d.find(x=>x.fuente=="oficial"):null;return o?(o.fechaActualizacion||"").slice(0,10):""}}];
-for(const c of cands){try{const r=await fetch(c.url,{cache:"no-store"});if(!r.ok)continue;const d=await r.json();const rate=+c.pick(d);if(rate>0){rateCache={rate,fuente:c.fuente,fecha:c.fecha(d)||""};return rateCache}}catch(e){}}
-if(VES_RATE>0){rateCache={rate:VES_RATE,fuente:"Tasa referencial (local)",fecha:""};return rateCache}
+for(const c of cands){try{const r=await fetch(c.url,{cache:"no-store"});if(!r.ok)continue;const d=await r.json();const rate=+c.pick(d);if(ok(rate)){rateCache={rate,fuente:c.fuente,fecha:c.fecha(d)||""};return rateCache}console.warn("Tasa BCV fuera de rango, ignorada:",rate,"(esperado entre "+RATE_MIN+" y "+RATE_MAX+")")}catch(e){}}
+if(ok(VES_RATE)){rateCache={rate:VES_RATE,fuente:"Tasa BCV configurada (respaldo)",fecha:""};return rateCache}
 return null}
 function waLink(msg){return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`}
 function copyText(s){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).catch(()=>{})}else{const t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove()}}
