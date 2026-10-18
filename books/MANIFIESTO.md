@@ -46,12 +46,17 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 | El presidio político en Cuba | José Martí | 1895 | 1965 | Martiano | — (enlace) | es.wikisource.org/wiki/El_presidio_político_en_Cuba | Dominio público | 2026-10-12 |
 | Respuesta a Sor Filotea de la Cruz | Sor Juana Inés de la Cruz | 1695 | 1765 | Latinoamericano | — (enlace) | marxists.org/espanol/tematica/mujer/autores/sorjuana | Dominio público | 2026-10-12 |
 | Siete ensayos de interpretación de la realidad peruana | José Carlos Mariátegui | 1930 | 2000 | Marxista | — (enlace) | marxists.org/espanol/mariateg/1928/7ensayos | Dominio público | 2026-10-12 |
+| Política | Aristóteles | 322 a.C. | — | Clásico | — (enlace) | archive.org/details/B091965 — trad. Pedro Simón Abril (†1595); reimpresión Madrid: Nuestra Raza (datos IA: 1910?) | Dominio público | 2026-10-17 |
+| La Ilíada | Homero | s. VIII a.C. | — | Clásico | — (enlace) | archive.org/details/A252268 — trad. José Gómez Hermosilla (†1837), Madrid: Imprenta Real, 1831 (3 tomos: A252268/9/70) | Dominio público | 2026-10-18 |
+| La República | Platón | 347 a.C. | — | Clásico | — (enlace) | archive.org/details/HCO191 — trad. José Tomás y García, 1805 (2 tomos: HCO191/2) | Dominio público | 2026-10-18 |
+| La Eneida | Virgilio | 19 a.C. | — | Clásico | — (enlace) | archive.org/details/A086C074 — trad. Juan de Enciso y Monzón, 1698 | Dominio público | 2026-10-18 |
+| Banquete, Hipias Mayor y Fedro | Platón | 347 a.C. | — | Clásico | — (enlace) | archive.org/details/banquete-hipias-mayor-fedro — trad. clásica, 1891 | Dominio público | 2026-10-18 |
 
-> El catálogo publica **14 títulos**: 6 con archivo hospedado y verificado en
+> El catálogo publica **19 títulos**: 6 con archivo hospedado y verificado en
 > `books/` (**Ariel**, **Facundo**, **El porvenir de la América Latina** —
 > Sempere, pre-1930 —, **La República Argentina y el caso de Venezuela** —
 > ed. 1903 —, **Noli me tángere** y **El Filibusterismo** — Gutenberg, notas de
-> Sempau †1909 —) y 8 que son solo enlace a su fuente original. Las fichas
+> Sempau †1909 —) y 13 que son solo enlace a su fuente original. Las fichas
 > marcadas «— (enlace)» se publican con `precio = 0` (botón "Leer gratis")
 > porque no se aloja PDF local. Todo título **sin archivo y sin fuente
 > verificable** está retirado del catálogo (ver abajo) hasta que se compruebe

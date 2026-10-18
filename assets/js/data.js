@@ -1,6 +1,6 @@
 // Catálogo: [0 título, 1 autor, 2 corriente, 3 precio USD (0 = enlace gratuito, no se vende),
 //            4 color, 5 descripción, 6 archivo (objeto en el bucket privado `libros`), 7 fuente (URL de origen), 8 licencia]
-// Corrientes: Bolivariano, Antiimperialista, Latinoamericano, Martiano, Zapatista, Marxista
+// Corrientes: Bolivariano, Antiimperialista, Latinoamericano, Martiano, Zapatista, Marxista, Clásico
 // Regla: solo dominio público estricto; verificar cada edición en books/MANIFIESTO.md
 const B=[
 ["Ariel","José Enrique Rodó","Latinoamericano",1.5,"#2f6fb0","Defensa de la identidad cultural latinoamericana (1900).","ariel.pdf","https://archive.org/details/arielrod00roduoft","Dominio público"],
@@ -16,4 +16,10 @@ const B=[
 ["Ismaelillo","José Martí","Martiano",0,"#245a86","Poemario de Martí para su hijo, ruptura de la métrica tradicional (1882). Texto libre.","","https://es.wikisource.org/wiki/Ismaelillo","Dominio público"],
 ["El presidio político en Cuba","José Martí","Martiano",0,"#33508a","Testimonio de Martí sobre la prisión y el trabajo forzado (1871). Texto libre.","","https://es.wikisource.org/wiki/El_presidio_pol%C3%ADtico_en_Cuba","Dominio público"],
 ["Respuesta a Sor Filotea de la Cruz","Sor Juana Inés de la Cruz","Latinoamericano",0,"#6b4a8a","Defensa de la educación y el pensamiento de la mujer (1691). Texto libre.","","https://www.marxists.org/espanol/tematica/mujer/autores/sorjuana/1692/marzo01.htm","Dominio público"],
-["Siete ensayos de interpretación de la realidad peruana","José Carlos Mariátegui","Marxista",0,"#146c60","Análisis del colonialismo, el latifundio y el socialismo peruano (1928). Texto libre.","","https://www.marxists.org/espanol/mariateg/1928/7ensayos/index.htm","Dominio público"]];
+["Siete ensayos de interpretación de la realidad peruana","José Carlos Mariátegui","Marxista",0,"#146c60","Análisis del colonialismo, el latifundio y el socialismo peruano (1928). Texto libre.","","https://www.marxists.org/espanol/mariateg/1928/7ensayos/index.htm","Dominio público"],
+["Política","Aristóteles","Clásico",0,"#a67c2e","La política como ciencia y el fin de la comunidad; traducción clásica de Pedro Simón Abril (†1595). Texto libre.","","https://archive.org/details/B091965","Dominio público"],
+["La Ilíada","Homero","Clásico",0,"#8a6a2f","Epopeya fundacional de Occidente: la cólera de Aquiles y la guerra de Troya; traducción de José Gómez Hermosilla (†1837, 1831). Texto libre.","","https://archive.org/details/A252268","Dominio público"],
+["La República","Platón","Clásico",0,"#b08a3e","Diálogo sobre la justicia y el Estado ideal: la caverna y el filósofo-rey; traducción de José Tomás y García (1805). Texto libre.","","https://archive.org/details/HCO191","Dominio público"],
+["La Eneida","Virgilio","Clásico",0,"#7a5c2a","Epopeya de Eneas y el origen mítico de Roma; traducción castellana de Juan de Enciso y Monzón (1698). Texto libre.","","https://archive.org/details/A086C074","Dominio público"],
+["Banquete, Hipias Mayor y Fedro","Platón","Clásico",0,"#9c7a34","Tres diálogos sobre el amor, la belleza y la retórica; traducción clásica (1891). Texto libre.","","https://archive.org/details/banquete-hipias-mayor-fedro","Dominio público"]
+];

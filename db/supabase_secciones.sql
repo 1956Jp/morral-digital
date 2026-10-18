@@ -32,7 +32,7 @@ create table if not exists public.books (
   corriente text not null
     check (corriente in (
       'Bolivariano', 'Antiimperialista', 'Latinoamericano',
-      'Martiano', 'Zapatista', 'Marxista'
+      'Martiano', 'Zapatista', 'Marxista', 'Clásico'
     )),
   -- 0 = enlace gratuito (no se vende).
   price numeric(10,2) not null default 0

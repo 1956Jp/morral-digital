@@ -4,7 +4,8 @@ const IC={
 "Latinoamericano":'<svg class="ic" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><circle cx="32" cy="32" r="10" fill="currentColor"/><path d="M32 6v10M32 48v10M6 32h10M48 32h10M13.6 13.6l7 7M43.4 43.4l7 7M13.6 50.4l7-7M43.4 20.6l7-7"/></svg>',
 "Martiano":'<svg class="ic" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path d="M32 20c-5-5-13-8-22-7v30c9-1 17 2 22 7z"/><path d="M32 20c5-5 13-8 22-7v30c-9-1-17 2-22 7z"/><path d="M32 20v30"/></svg>',
 "Zapatista":'<svg class="ic" viewBox="0 0 64 64" fill="currentColor"><path d="M32 12c7 0 12 8 13 18l1 5H18l1-5c1-10 6-18 13-18z"/><rect x="17" y="31" width="30" height="6" rx="3"/><ellipse cx="32" cy="42" rx="27" ry="7"/></svg>',
-"Marxista":'<svg class="ic" viewBox="0 0 64 64" fill="currentColor"><rect x="28" y="24" width="8" height="34" rx="4"/><rect x="14" y="8" width="36" height="17" rx="4"/><path d="M50 40l10 10-7 7-10-10z"/></svg>'};
+"Marxista":'<svg class="ic" viewBox="0 0 64 64" fill="currentColor"><rect x="28" y="24" width="8" height="34" rx="4"/><rect x="14" y="8" width="36" height="17" rx="4"/><path d="M50 40l10 10-7 7-10-10z"/></svg>',
+"Clásico":'<svg class="ic" viewBox="0 0 64 64" fill="currentColor"><path d="M32 4 6 19h52z"/><rect x="6" y="19" width="52" height="5"/><rect x="14" y="24" width="4" height="24"/><rect x="25" y="24" width="4" height="24"/><rect x="36" y="24" width="4" height="24"/><rect x="47" y="24" width="4" height="24"/><rect x="8" y="48" width="48" height="5" rx="1"/><rect x="4" y="55" width="56" height="6" rx="2"/></svg>'};
 // ==== Configuración central (assets/js/config.js). Si falta, usa respaldo ====
 const CFG=(typeof window!=="undefined"&&window.CFG)||{};
 const _marca=CFG.marca||{},_textos=CFG.textos||{},_pago=CFG.pago||{};
@@ -41,6 +42,7 @@ let cart=[],cat="Todos",lastMethod="card",orderCode="",rateCache=null;
 const $=i=>document.getElementById(i),f=n=>"$"+n.toFixed(2);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const newOrder=()=>"MD-"+Math.random().toString(36).slice(2,8).toUpperCase();
+const newFree=()=>"GR-"+Math.random().toString(36).slice(2,8).toUpperCase();
 const bsFmt=n=>new Intl.NumberFormat("es-VE",{style:"currency",currency:"VES",minimumFractionDigits:2}).format(n);
 const toBs=(usd,rate)=>usd*rate;
 // Morral persistente: guarda los TÍTULOS (id estable) en localStorage, no los
@@ -93,25 +95,59 @@ try{await fetch(`${SB_URL}/rest/v1/rpc/registrar_pedido`,{method:"POST",headers:
 // Envía un correo vía EmailJS (REST/JSON, sin librerías). Silencioso: si falla
 // o no hay config, no rompe la confirmación. Límite de EmailJS: 1 envío/segundo.
 async function sendMail(tpl,params){
-if(!MAIL_ON||!tpl)return;
-try{const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})});if(!r.ok)console.warn("EmailJS",tpl,`HTTP ${r.status}`,await r.text().catch(()=>""))}catch(e){console.warn("EmailJS: fallo de red",tpl,e)}}
+if(!MAIL_ON||!tpl)return false;
+try{const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})});if(!r.ok){console.warn("EmailJS",tpl,`HTTP ${r.status}`,await r.text().catch(()=>""));return false}return true}catch(e){console.warn("EmailJS: fallo de red",tpl,e);return false}}
 // Avisa al administrador del pedido y manda al cliente un acuse con (opcional)
 // sus enlaces. Se separa ~1s para respetar el límite de EmailJS.
 async function notifyOrder(correo,codigo){
 if(!MAIL_ON)return;
 const info=rateCache,usd=total(),banco=lastMethod=="bank";
 const base=location.href.replace(/[^/]*$/,"");
-// Entrega protegida: los archivos viven en un bucket privado, así que el
-// correo NO puede llevar el archivo ni una URL pública. En su lugar envía
-// instrucciones para reclamarlo en el sitio («Mis descargas»).
-const claimInfo=MAIL.enviarEnlaces?`<p>Cuando confirmemos tu pago podrás descargar tus libros en <a href="${base}">la tienda</a>: pulsa «Mis descargas» e introduce el código <b>${codigo}</b> y tu correo.</p>`:"";
-const params={email:String(correo||""),client_email:String(correo||""),admin_email:MAIL.adminEmail||"",order_code:codigo,metodo:ETIQ[lastMethod]||lastMethod,total:f(usd),moneda:"USD",
+// Entrega protegida (bucket privado): el correo NO lleva el archivo ni una
+// URL pública. Incluye los títulos comprados y el ENLACE WEB donde se
+// descargan («Mis descargas»), con instrucciones y el código del pedido.
+const enlaces=MAIL.enviarEnlaces?`<p>Tus libros:</p><ul>${cartTitles().map(t=>`<li>${esc(t)}</li>`).join("")}</ul><p>Descárgalos en la tienda: <a href="${base}">${base}</a><br>Pulsa «Mis descargas» e introduce el código <b>${codigo}</b> y tu correo.</p>`:"";
+const params={email:String(correo||""),client_email:String(correo||""),admin_email:MAIL.adminEmail||"",order_code:codigo,metodo:ETIQ[lastMethod]||lastMethod,total:f(usd),moneda:"USD",pago:"1",
 monto_bs:banco&&info?bsFmt(toBs(usd,info.rate)):"",tasa_bs:banco&&info?bsFmt(info.rate):"",
-items:cartTitles().join(", "),enlaces:claimInfo,
+items:cartTitles().join(", "),enlaces:enlaces,
 whatsapp:waLink(`Hola, sobre el pedido ${codigo} de El Morral Digital`)};
 await sendMail(MAIL.templateAdmin,params);
 await new Promise(r=>setTimeout(r,1100));
 await sendMail(MAIL.templateCliente,params)}
+// ==== Descarga gratuita: registra el correo del solicitante y le manda el enlace ====
+// Guarda el correo en la tabla `solicitudes` (RLS de solo-INSERT: se consulta
+// desde el panel) y envía al solicitante el enlace al libro desde la cuenta del
+// administrador (EmailJS). Best-effort: si falta config, no rompe la página.
+async function saveSolicitud(email,row,code){
+if(!SB_ON)return;
+try{await sbInsert("solicitudes",{email:String(email||""),book_title:row[0],source_url:row[7]||"",code:code||""})}catch(e){}}
+async function notifyFree(email,row,code){
+if(!MAIL_ON||!String(email||"").includes("@"))return false;
+const base=location.href.replace(/[^/]*$/,"");
+const enlace=row[7]?`<p>Aquí tienes <b>${esc(row[0])}</b>:</p><ul><li><a href="${esc(row[7])}">${esc(row[0])}</a></li></ul>`:`<p>Tienes <b>${esc(row[0])}</b> disponible en la tienda.</p>`;
+const params={email:String(email),client_email:String(email),admin_email:MAIL.adminEmail||"",order_code:code||"GR-",metodo:"Descarga gratuita",total:f(0),moneda:"USD",pago:"",
+monto_bs:"",tasa_bs:"",items:row[0],
+enlaces:`${enlace}<p>Más en la tienda: <a href="${base}">${base}</a></p>`,
+whatsapp:waLink(`Hola, sobre el libro ${row[0]} de El Morral Digital`)};
+return sendMail(MAIL.templateCliente,params)}
+// Formulario de descarga gratuita: pide el correo del solicitante.
+function freeBook(i){
+const b=B[i];if(!b)return;
+closeAll();$("pay").classList.add("show");
+const abrir=b[7]?`<a class="btn ghost" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:8px" href="${esc(b[7])}" target="_blank" rel="noopener">Abrir el enlace ahora</a>`:"";
+$("pm").innerHTML=`<h2>${esc(b[0])}</h2><p class="note">${esc(b[1])} · ${esc(b[2])}</p><p>Te enviamos el enlace de descarga a tu correo.</p><input type="email" id="fe-em" placeholder="Tu correo"><button class="btn alt" style="width:100%" onclick="freeSend(${i})">Recibir el enlace por correo</button>${abrir}<div id="fe-msg"></div>`}
+async function freeSend(i){
+const b=B[i];if(!b)return;
+const inp=document.getElementById("fe-em"),msg=document.getElementById("fe-msg");
+const em=((inp&&inp.value)||"").trim();
+if(!em.includes("@")){if(inp)inp.focus();if(msg)msg.innerHTML="<p class='note'>Escribe un correo válido.</p>";return}
+const code=newFree();
+if(msg)msg.innerHTML="<p class='note'>Enviando…</p>";
+saveSolicitud(em,b,code).catch(()=>{});
+let enviado=false;try{enviado=await notifyFree(em,b,code)}catch(e){}
+if(!msg)return;
+const abrir=b[7]?` <a href="${esc(b[7])}" target="_blank" rel="noopener">abrir el enlace ahora</a>`:"";
+msg.innerHTML=enviado?`<p class="note">Listo (ref. <b>${esc(code)}</b>). Enviamos el enlace a <b>${esc(em)}</b>.${abrir}</p>`:`<p class="note">No se pudo enviar el correo (ref. <b>${esc(code)}</b>).${abrir}</p>`}
 // ==== Supabase: catálogo, reseñas y actividad por sección ====
 // Mismo estilo que saveOrder (REST/PostgREST, sin librerías). Todo es
 // best-effort: si no hay config o la red falla, el sitio usa los datos
@@ -173,7 +209,7 @@ set("nav-catalogo",n.catalogo);set("nav-resenas",n.resenas);set("nav-expansion",
 applyTheme();toggleSections()}
 function draw(){const cs=["Todos",...new Set(B.map(b=>b[2]))];
 $("filters").innerHTML=cs.map(c=>`<button class="chip ${c==cat?"on":""}" onclick="cat='${c}';draw()">${c}</button>`).join("");
-$("grid").innerHTML=B.map((b,i)=>({b,i})).filter(o=>cat=="Todos"||o.b[2]==cat).map(({b,i})=>`<div class="book"><div class="cover" style="--c:${b[4]};border-top:5px solid ${b[4]};background:linear-gradient(150deg,${b[4]}1f,${b[4]}4d)">${IC[b[2]]}<span class="cb">${b[2]}</span><b>${b[0]}</b><small>${b[1]}</small></div><div class="bb"><span class="tag">★ ${b[8]||"Dominio público"} · ${b[2]}</span><p>${b[5]}</p><div class="row"><span class="price${b[3]?"":" gratis"}">${b[3]?f(b[3]):"Gratis"}</span>${b[3]?`<button class="btn comprar" onclick="add(${i})" title="${TXT.etiquetaMorral}">${TXT.botonComprar}</button>`:`<a class="btn gratis" href="${b[7]}" target="_blank" rel="noopener">${TXT.botonGratis}</a>`}</div></div></div>`).join("")}
+$("grid").innerHTML=B.map((b,i)=>({b,i})).filter(o=>cat=="Todos"||o.b[2]==cat).map(({b,i})=>`<div class="book"><div class="cover" style="--c:${b[4]};border-top:5px solid ${b[4]};background:linear-gradient(150deg,${b[4]}1f,${b[4]}4d)">${IC[b[2]]}<span class="cb">${b[2]}</span><b>${b[0]}</b><small>${b[1]}</small></div><div class="bb"><span class="tag">★ ${b[8]||"Dominio público"} · ${b[2]}</span><p>${b[5]}</p><div class="row"><span class="price${b[3]?"":" gratis"}">${b[3]?f(b[3]):"Gratis"}</span>${b[3]?`<button class="btn comprar" onclick="add(${i})" title="${TXT.etiquetaMorral}">${TXT.botonComprar}</button>`:`<button class="btn gratis" onclick="freeBook(${i})">${TXT.botonGratis}</button>`}</div></div></div>`).join("")}
 function add(i){const k=B[i][0];if(!B[i][3]||cart.includes(k))return;cart.push(k);upd();openCart()}
 function rmAt(idx){cart.splice(idx,1);upd()}
 const total=()=>cart.reduce((s,k)=>{const r=rowOf(k);return s+(r?+r[3]:0)},0);

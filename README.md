@@ -78,6 +78,8 @@ Seguridad: la `anonKey` es pública por diseño; la protección es la **RLS de s
 
 > Nota: `registrar_pedido` genera el `id` con `gen_random_uuid()` y **no** usa `insert ... returning`; eso exigiría una política SELECT para `anon`, que no existe a propósito (protege la PII del correo).
 
+**Descargas gratuitas.** Los títulos de enlace libre (precio `0`) no entran al morral: al pulsar *Leer gratis* el sitio pide el **correo del solicitante** y lo guarda en la tabla `solicitudes` (`db/supabase_solicitudes.sql`, misma RLS de solo-INSERT). Así puedes consultar quién pidió cada título desde el Table Editor. El enlace se envía por correo (ver EmailJS).
+
 ## Entrega protegida (Fase 2)
 Los PDF/EPUB de pago **no** se publican en el repo. Viven en un **bucket privado** `libros` de Supabase Storage y se entregan con **URLs firmadas temporales** (~1 h) solo cuando el pedido está `paid`. Sin `service_role` en el navegador.
 
@@ -102,7 +104,7 @@ Los PDF/EPUB de pago **no** se publican en el repo. Viven en un **bucket privado
 Seguridad: la Edge Function corre con `verify_jwt=true` (la `anonKey` es un JWT válido) y exige que el correo coincida con el del pedido, para no exponer descargas a quien solo adivine el código. Los enlaces caducan (~1 h); el cliente puede volver a generarlos desde «Mis descargas».
 
 ## Correos con EmailJS (opcional)
-Al confirmar un pedido, el sitio puede enviar **dos correos** con [EmailJS](https://www.emailjs.com): un **acuse + agradecimiento al cliente** (con las instrucciones para reclamar sus descargas en «Mis descargas», si `enviarEnlaces` es `true`) y un **aviso de pago al administrador** con el tipo de producto pedido. Se hace con un `POST` JSON a `https://api.emailjs.com/api/v1.0/email/send`, **sin librerías**, igual que la tasa del BCV y Supabase. Si `publicKey`/`serviceId` están vacíos, se desactiva y el sitio funciona igual.
+Al confirmar un pedido, el sitio puede enviar **dos correos** con [EmailJS](https://www.emailjs.com): un **acuse al cliente** (con los títulos y el **enlace web donde se descargan** — «Mis descargas» —, si `enviarEnlaces` es `true`) y un **aviso de pago al administrador** con el tipo de producto pedido. Al pedir una **descarga gratuita** (`freeSend()`), se envía al solicitante un correo con el **enlace directo al libro** y se guarda su correo en `solicitudes` con una referencia `GR-XXXXXX` que aparece también en el correo (para cruzarlos). Los correos salen desde la cuenta conectada (la del administrador) con un `POST` JSON a `https://api.emailjs.com/api/v1.0/email/send`, **sin librerías**, igual que la tasa del BCV y Supabase. Si `publicKey`/`serviceId` están vacíos, se desactiva y el sitio funciona igual.
 
 1. **Crea la cuenta y conecta el servicio**: en [dashboard.emailjs.com](https://dashboard.emailjs.com) añade un *Email Service* (Gmail/Outlook/SMTP…). Copia su **Service ID** (`service_xxx`).
 2. **Crea dos plantillas** (*Email Templates*): el cuerpo listo para pegar está en `emailjs/plantilla-cliente.html` y `emailjs/plantilla-admin.html` (ver `emailjs/README.md`).
@@ -122,10 +124,10 @@ Variables disponibles en las plantillas (todas las recibe cada correo):
 | `{{items}}` | Lista de títulos separados por comas |
 | `{{total}}` / `{{moneda}}` | Importe (`$12.00`) y divisa (`USD`) |
 | `{{monto_bs}}` / `{{tasa_bs}}` | Monto en Bs y tasa BCV (solo Pago Móvil) |
-| `{{enlaces}}` | Instrucciones HTML para reclamar las descargas en «Mis descargas» (vacío si `enviarEnlaces` es `false`) |
+| `{{enlaces}}` | Enlaces a los libros: en compras, los títulos + el **enlace web** donde se descargan («Mis descargas»); en descargas gratuitas, el enlace directo al libro. Vacío si `enviarEnlaces` es `false` (solo compras) |
 | `{{whatsapp}}` | Enlace `wa.me` para enviar el comprobante del pedido por WhatsApp |
 
-> **Límite importante:** el sitio es estático y **no verifica cobros**; los archivos de pago viven en el bucket privado `libros`. El correo **no adjunta archivos**: con `enviarEnlaces: true` incluye las instrucciones para reclamar en «Mis descargas»; con `false` solo el acuse. La entrega real (URLs firmadas) la controla el estado `paid` del pedido. EmailJS limita a **1 envío por segundo**: el código separa los dos correos ~1 s.
+> **Límite importante:** el sitio es estático y **no verifica cobros**; los archivos de pago viven en el bucket privado `libros`. El correo **no adjunta archivos ni URLs públicas de pago**: incluye los títulos y el enlace web donde se descargan. Con `enviarEnlaces: false` solo va el acuse. En las **descargas gratuitas** sí se envía el enlace directo al libro. La entrega real (URLs firmadas) la controla el estado `paid` del pedido. EmailJS limita a **1 envío por segundo**: el código separa los dos correos ~1 s.
 
 Seguridad: la **Public Key** es pública (va en el navegador); la protección es el *Allowlist* de orígenes. **Nunca** pongas en `config.js` la clave privada (`accessToken`). En Vercel, el `connect-src` de `vercel.json` ya incluye `https://api.emailjs.com`; en GitHub Pages no hay CSP que ajustar.
 
@@ -148,5 +150,5 @@ Solo se publican obras de **dominio público estricto** (autor fallecido + 70 a�
 
 Quedan fuera: licencias con cláusula NC (CC BY-NC / BY-NC-SA), textos con copyright vivo (Fidel Castro, Ho Chi Minh, Che Guevara, Hugo Chávez) y PDFs de institutos que marcan `D.R.` (INEHRM). La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito (`precio = 0`), nunca a la venta.
 
-Corrientes del catálogo: **Bolivariano, Martiano, Zapatista, Marxista, Antiimperialista, Latinoamericano.**
+Corrientes del catálogo: **Bolivariano, Martiano, Zapatista, Marxista, Antiimperialista, Latinoamericano, Clásico.**
 El código del sitio se publica bajo licencia MIT.

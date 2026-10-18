@@ -8,8 +8,9 @@
     · Content  : pega TODO lo que va debajo de este comentario.
   Variables disponibles: {{email}}, {{client_email}}, {{admin_email}},
     {{order_code}}, {{metodo}}, {{items}}, {{total}}, {{moneda}},
-    {{monto_bs}}, {{tasa_bs}}, {{enlaces}}, {{whatsapp}}.
+    {{monto_bs}}, {{tasa_bs}}, {{enlaces}}, {{whatsapp}}, {{pago}}.
   Llaves dobles  = escapadas;  llaves triples = HTML sin escapar.
+  {{{pago}}}/{{#pago}} = bloque solo para compras (no en descargas gratuitas).
   =====================================================================
 -->
 <div style="margin:0;padding:0;background:#f6f1e4;font-family:Georgia,'Times New Roman',serif;color:#231a0a">
@@ -34,18 +35,22 @@
           <td style="padding:5px 0;color:#6b6250">Pedido</td>
           <td style="padding:5px 0;text-align:right"><b>{{order_code}}</b></td>
         </tr>
+        {{#pago}}
         <tr>
           <td style="padding:5px 0;color:#6b6250">Método de pago</td>
           <td style="padding:5px 0;text-align:right">{{metodo}}</td>
         </tr>
+        {{/pago}}
         <tr>
           <td style="padding:5px 0;color:#6b6250;vertical-align:top">Libros</td>
           <td style="padding:5px 0;text-align:right">{{items}}</td>
         </tr>
+        {{#pago}}
         <tr>
           <td style="padding:5px 0;color:#6b6250">Total</td>
           <td style="padding:5px 0;text-align:right"><b>{{total}} {{moneda}}</b></td>
         </tr>
+        {{/pago}}
         {{#monto_bs}}
         <tr>
           <td style="padding:5px 0;color:#6b6250">Monto en Bs</td>
@@ -54,6 +59,7 @@
         {{/monto_bs}}
       </table>
 
+      {{#pago}}
       <div style="background:#ffe066;color:#3a2c00;padding:12px 14px;border-radius:10px;font-size:15px;line-height:1.45">
         <b>Para confirmar tu pago</b>, envíanos el comprobante por WhatsApp y lo verificamos.
       </div>
@@ -62,16 +68,17 @@
           Enviar comprobante por WhatsApp
         </a>
       </p>
+      {{/pago}}
 
       {{#enlaces}}
-      <p style="margin:24px 0 8px;font-size:16px">Tus descargas:</p>
+      <p style="margin:24px 0 8px;font-size:16px">Tus libros:</p>
       <div style="background:#f4efe0;border:1px dashed #d8c9a3;border-radius:10px;padding:12px 16px;line-height:1.7">
         {{{enlaces}}}
       </div>
       {{/enlaces}}
       {{^enlaces}}
       <p style="margin:24px 0 0;line-height:1.55;color:#6b6250">
-        Cuando confirmemos tu pago te enviaremos aquí mismo los enlaces de descarga.
+        Cuando confirmemos tu pago podrás descargarlos desde la tienda: entra en «Mis descargas» con tu código de pedido y tu correo.
       </p>
       {{/enlaces}}
 

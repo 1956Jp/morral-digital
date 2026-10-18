@@ -1,11 +1,15 @@
 # Plantillas de correo (EmailJS)
 
-Correos **automáticos** al cerrar un pedido. El sitio los dispara solo desde
-`done()` en `assets/js/app.js` (`notifyOrder()`), vía la API REST de EmailJS
+Correos **automáticos** al **cerrar un pedido** (`done()` → `notifyOrder()`) y al
+pedir una **descarga gratuita** (`freeSend()` → `notifyFree()`), en `assets/js/app.js`.
+Se envían desde la cuenta conectada (la del administrador) vía la API REST de EmailJS
 (`POST https://api.emailjs.com/api/v1.0/email/send`), sin librerías.
 
-- `plantilla-cliente.html` → **acuse + agradecimiento + descargas** al cliente.
+- `plantilla-cliente.html` → **acuse + enlaces a los libros** al cliente/solicitante.
 - `plantilla-admin.html` → **aviso de pago** al administrador.
+
+En ambos casos, el correo del solicitante se guarda en Supabase (pedidos en `orders`;
+descargas gratuitas en `solicitudes`) para poder consultarlo.
 
 ## Puesta en marcha
 
@@ -35,7 +39,7 @@ Correos **automáticos** al cerrar un pedido. El sitio los dispara solo desde
 | `{{items}}` | Títulos separados por comas |
 | `{{total}}` / `{{moneda}}` | Importe y divisa (`USD`) |
 | `{{monto_bs}}` / `{{tasa_bs}}` | Monto en Bs y tasa BCV (solo Pago Móvil) |
-| `{{enlaces}}` | `<ul>` de descargas (vacío si `enviarEnlaces` es `false`) |
+| `{{enlaces}}` | Enlaces a los libros: en compras, los títulos + el **enlace web** donde se descargan («Mis descargas»); en descargas gratuitas, el enlace directo al libro. Vacío si `enviarEnlaces` es `false` (solo compras). |
 | `{{whatsapp}}` | Enlace `wa.me` para enviar el comprobante |
 
 Llaves **dobles** = valor escapado; llaves **triples** (`{{{enlaces}}}`) = HTML
@@ -52,7 +56,13 @@ sin escapar. Renderizado condicional: `{{#var}}…{{/var}}` y `{{^var}}…{{/var
 
 ## Honestidad
 
-El sitio es **estático y no verifica cobros**; los PDF son públicos por URL. Con
-`enviarEnlaces: true` el cliente recibe los enlaces de inmediato (por honor). Si
-prefieres entregarlos solo tras confirmar el pago, pon `enviarEnlaces: false`: el
-correo al cliente mostrará el aviso de *«cuando confirmemos tu pago…»*.
+El sitio es **estático y no verifica cobros**. En las **compras**, los archivos de
+pago viven en el **bucket privado** `libros` y solo se sirven con URLs firmadas
+cuando el pedido está `paid`. Por eso el correo al cliente **no adjunta archivos ni
+URLs públicas**: incluye los títulos y el **enlace web donde se descarga** («Mis
+descargas»), con el código del pedido y el correo. Con `enviarEnlaces: false` el
+correo al cliente solo lleva el acuse.
+
+En las **descargas gratuitas** (títulos de enlace libre) el correo sí lleva el enlace
+directo al libro, y el correo del solicitante se guarda en la tabla `solicitudes`
+(RLS de solo-INSERT) para consultarlo desde el panel de Supabase.

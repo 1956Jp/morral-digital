@@ -54,7 +54,22 @@ values
    '', 'https://www.marxists.org/espanol/tematica/mujer/autores/sorjuana/1692/marzo01.htm', 'Dominio público', 12, true),
   ('Siete ensayos de interpretación de la realidad peruana', 'José Carlos Mariátegui', 'Marxista', 0, '#146c60',
    'Análisis del colonialismo, el latifundio y el socialismo peruano (1928). Texto libre.',
-   '', 'https://www.marxists.org/espanol/mariateg/1928/7ensayos/index.htm', 'Dominio público', 13, true)
+   '', 'https://www.marxists.org/espanol/mariateg/1928/7ensayos/index.htm', 'Dominio público', 13, true),
+  ('Política', 'Aristóteles', 'Clásico', 0, '#a67c2e',
+   'La política como ciencia y el fin de la comunidad; traducción clásica de Pedro Simón Abril (†1595). Texto libre.',
+   '', 'https://archive.org/details/B091965', 'Dominio público', 14, true),
+  ('La Ilíada', 'Homero', 'Clásico', 0, '#8a6a2f',
+   'Epopeya fundacional de Occidente: la cólera de Aquiles y la guerra de Troya; traducción de José Gómez Hermosilla (†1837, 1831). Texto libre.',
+   '', 'https://archive.org/details/A252268', 'Dominio público', 15, true),
+  ('La República', 'Platón', 'Clásico', 0, '#b08a3e',
+   'Diálogo sobre la justicia y el Estado ideal: la caverna y el filósofo-rey; traducción de José Tomás y García (1805). Texto libre.',
+   '', 'https://archive.org/details/HCO191', 'Dominio público', 16, true),
+  ('La Eneida', 'Virgilio', 'Clásico', 0, '#7a5c2a',
+   'Epopeya de Eneas y el origen mítico de Roma; traducción castellana de Juan de Enciso y Monzón (1698). Texto libre.',
+   '', 'https://archive.org/details/A086C074', 'Dominio público', 17, true),
+  ('Banquete, Hipias Mayor y Fedro', 'Platón', 'Clásico', 0, '#9c7a34',
+   'Tres diálogos sobre el amor, la belleza y la retórica; traducción clásica (1891). Texto libre.',
+   '', 'https://archive.org/details/banquete-hipias-mayor-fedro', 'Dominio público', 18, true)
 on conflict (title) do update set
   author = excluded.author,
   corriente = excluded.corriente,

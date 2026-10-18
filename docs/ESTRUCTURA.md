@@ -11,8 +11,8 @@ build, ni `package.json`, ni tests automatizados. "Backend" aquí significa
 | `index.html` | Marcado de la página: barra de navegación, hero, secciones (catálogo, reseñas, expansión), modales de morral y pago. Carga `config.js` → `data.js` → `app.js` como scripts clásicos. |
 | `assets/css/styles.css` | Estilos, variables de color (`--bg`, `--card`, `--ink`, `--gold`, `--pollo`, `--sangre`…) y modo oscuro. |
 | `assets/js/config.js` | Configuración central `CFG`: marca, textos, colores, secciones, métodos de pago, datos de cobro (`pago`), Supabase y EmailJS. |
-| `assets/js/data.js` | Catálogo **semilla** `B`: 14 filas posicionales de 9 campos. Respaldo si Supabase no responde. |
-| `assets/js/app.js` | Lógica: filtros, morral persistente (`localStorage`), checkout, reclamo de descargas (`claim`), helpers de Supabase (`sbGet`/`sbInsert`), `saveOrder`, `notifyOrder` (EmailJS). |
+| `assets/js/data.js` | Catálogo **semilla** `B`: 19 filas posicionales de 9 campos. Respaldo si Supabase no responde. |
+| `assets/js/app.js` | Lógica: filtros, morral persistente (`localStorage`), checkout, descargas gratuitas (`freeBook`/`freeSend`), reclamo de descargas (`claim`), helpers de Supabase (`sbGet`/`sbInsert`), `saveOrder`/`saveSolicitud`, `notifyOrder`/`notifyFree` (EmailJS). |
 
 ## 2. Backend (Supabase + entrega protegida)
 
@@ -20,8 +20,10 @@ build, ni `package.json`, ni tests automatizados. "Backend" aquí significa
 | --- | --- |
 | `db/supabase_pedidos.sql` | Tablas `orders` / `order_items`, RLS de solo-`INSERT` para `anon` y función atómica `registrar_pedido`. |
 | `db/supabase_secciones.sql` | Tablas `books` / `reviews` / `section_events` (catálogo, reseñas y actividad). |
+| `db/supabase_solicitudes.sql` | Tabla `solicitudes` (correo del solicitante + referencia `GR-XXXXXX` en descargas gratuitas; RLS de solo-`INSERT`). |
 | `db/supabase_storage.sql` | Bucket **privado** `libros` (sin acceso `anon`). |
 | `db/seed_books.sql` | Semilla del catálogo para la tabla `books` (copia de `data.js`). |
+| `db/agregar-libro.mjs` | Atajo para añadir libro(s): valida la corriente, edita `data.js`/`seed_books.sql`/`MANIFIESTO.md`, sube el `?v=` e imprime el INSERT de Supabase (`--apply`, `--lote`; dry-run por defecto). |
 | `db/subir_libros.sh` | Sube los 6 PDF/EPUB de pago al bucket `libros` usando la `service_role` (por variable de entorno). |
 | `supabase/functions/entregar/index.ts` | Edge Function: valida `order_code` + `email` + `status='paid'` y devuelve URLs firmadas (~1 h). |
 
@@ -60,6 +62,9 @@ Cliente (navegador)
   │  morral → localStorage
   │  checkout() → saveOrder() ── POST /rpc/registrar_pedido ─► Supabase (orders, pending_review)
   │  done() → notifyOrder() ───── POST api.emailjs.com ──────► correo admin + cliente
+  │  freeBook()/freeSend() (título gratis)
+  │        ├─ saveSolicitud() ── INSERT ─► Supabase (solicitudes: correo + ref. GR-XXXXXX)
+  │        └─ notifyFree() ───── POST api.emailjs.com ──────► correo al solicitante (enlace al libro)
   │
 Admin
   │  recibe el comprobante por WhatsApp → verifica → marca status='paid' en Supabase

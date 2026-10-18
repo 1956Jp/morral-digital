@@ -105,13 +105,11 @@ window.CFG = {
   // con el «Allowlist» de orígenes en el panel de EmailJS. NUNCA pongas aquí
   // la clave privada (accessToken) ni ninguna credencial secreta.
   emailjs: {
-    // MODO TEST: deja estos 3 campos vacíos y todo sigue desactivado.
-    // Para activarlos: pega aquí abajo los ID reales de tu dashboard.
-    publicKey: "kTwN8Sthj84cLVIbV", // Public Key de la cuenta (pública)
-    serviceId: "service_1bsj1mi",          // TODO → pega el Service ID (service_xxx)
-    templateCliente: "template_9a4yync",    // TODO → pega el Template ID del acuse al cliente (tpl_xxx)
-    templateAdmin: "template_3w8khjr",      // TODO → pega el Template ID del aviso a ti (tpl_xxx)
+    publicKey: "kTwN8Sthj84cLVIbV",        // Public Key de la cuenta (pública)
+    serviceId: "service_0xhzzc5",           // Service ID (service_xxx)
+    templateCliente: "template_9a4yync",    // Template ID del acuse/descargas al cliente
+    templateAdmin: "template_3w8khjr",      // Template ID del aviso al administrador
     adminEmail: "abogjoseperez014@gmail.com", // tu correo de administrador (recibe el aviso de pago)
-    enviarEnlaces: true     // true = el correo al cliente incluye instrucciones para reclamar en «Mis descargas»
+    enviarEnlaces: true     // true = el correo al cliente incluye los títulos y el enlace web de descarga («Mis descargas»)
   }
 };
