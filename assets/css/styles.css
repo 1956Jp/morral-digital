@@ -24,6 +24,7 @@ section{padding:36px 0}h2{font-size:30px;margin:0 0 6px;color:var(--oro)}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:99px;cursor:pointer;font:14px Oswald,sans-serif}
 .chip.on{background:var(--gold);color:#0f1f1e;border-color:var(--gold)}
+.chip small{display:block;font-size:10px;opacity:.7;margin-top:1px;letter-spacing:.2px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
 .book{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .cover{height:178px;padding:14px;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;font-family:Oswald,sans-serif}
