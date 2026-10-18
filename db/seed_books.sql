@@ -13,7 +13,7 @@
 insert into public.books
   (title, author, corriente, price, color, description, file, source_url, license, sort_order, active)
 values
-  ('Ariel', 'José Enrique Rodó', 'Latinoamericano', 1.5, '#2f6fb0',
+  ('Ariel', 'José Enrique Rodó', 'Latinoamericano', 1, '#2f6fb0',
    'Defensa de la identidad cultural latinoamericana (1900).',
    'ariel.pdf', 'https://archive.org/details/arielrod00roduoft', 'Dominio público', 0, true),
   ('Primera Declaración de la Selva Lacandona', 'EZLN', 'Zapatista', 0, '#7a4a2f',
@@ -25,19 +25,19 @@ values
   ('La palabra del EZLN (archivo de comunicados)', 'EZLN', 'Zapatista', 0, '#5a3a2f',
    'Archivo de comunicados desde 2011. Radio Zapatista publica bajo CC BY-NC-SA: enlace gratuito.',
    '', 'https://radiozapatista.org/?page_id=3365', 'Enlace libre (CC BY-NC-SA)', 3, true),
-  ('Facundo', 'Domingo F. Sarmiento', 'Latinoamericano', 1.5, '#35608f',
+  ('Facundo', 'Domingo F. Sarmiento', 'Latinoamericano', 1, '#35608f',
    'Civilización o barbarie: radiografía de la Argentina del siglo XIX y del caudillismo (1845).',
    'facundo.pdf', 'https://archive.org/details/facundos00sarmuoft', 'Dominio público', 4, true),
-  ('El porvenir de la América Latina', 'Manuel Ugarte', 'Antiimperialista', 1, '#8a2f2f',
+  ('El porvenir de la América Latina', 'Manuel Ugarte', 'Antiimperialista', 0.5, '#8a2f2f',
    'Denuncia del imperialismo en América y apuesta por la unidad latinoamericana (1910).',
    'ugarte-el-porvenir.pdf', 'https://www.siese.org/modulos/manuel_ugarte/elporvenir.pdf', 'Dominio público', 5, true),
-  ('La República Argentina y el caso de Venezuela', 'Luis María Drago', 'Antiimperialista', 1, '#a33b2b',
+  ('La República Argentina y el caso de Venezuela', 'Luis María Drago', 'Antiimperialista', 0.5, '#a33b2b',
    'Origen de la Doctrina Drago: rechazo al cobro de deudas con la fuerza (1903).',
    'drago-caso-venezuela.pdf', 'http://www.bibliotecadigital.gob.ar/items/show/847', 'Dominio público', 6, true),
-  ('Noli me tángere', 'José Rizal', 'Antiimperialista', 1, '#7a2e46',
+  ('Noli me tángere', 'José Rizal', 'Antiimperialista', 0.5, '#7a2e46',
    'Novela anticolonial filipina contra el dominio español (1887).',
    'noli-me-tangere.epub', 'https://www.gutenberg.org/ebooks/47584', 'Dominio público', 7, true),
-  ('El Filibusterismo', 'José Rizal', 'Antiimperialista', 1, '#6d2440',
+  ('El Filibusterismo', 'José Rizal', 'Antiimperialista', 0.5, '#6d2440',
    'Continuación de Noli: la denuncia del despotismo colonial (1891).',
    'el-filibusterismo.epub', 'https://www.gutenberg.org/ebooks/30903', 'Dominio público', 8, true),
   ('Manifiesto de Cartagena', 'Simón Bolívar', 'Bolivariano', 0, '#1f6f8c',
@@ -84,7 +84,13 @@ values
    '', 'https://www.marxists.org/espanol/m-e/1880s/origen/index.htm', 'Dominio público', 22, true),
   ('Trabajo asalariado y capital', 'Karl Marx', 'Marxista', 0, '#9e2a2b',
    'Exposición divulgativa, basada en conferencias de 1847, sobre la explotación de la fuerza de trabajo y la relación entre capital y trabajo (1849).',
-   '', 'https://www.marxists.org/espanol/m-e/1840s/49-trab2.htm', 'Dominio público', 23, true)
+   '', 'https://www.marxists.org/espanol/m-e/1840s/49-trab2.htm', 'Dominio público', 23, true),
+  ('El imperialismo petrolero y la Revolución Venezolana. Tomo I', 'Comisión Ideológica de Ruptura', 'Antiimperialista', 0.5, '#8a3b2b',
+   'Capital y propiedad territorial: análisis marxista del desarrollo del imperialismo petrolero en Venezuela desde la penetración de principios del siglo XX (Fondo Editorial Salvador de la Plaza, 1975).',
+   'imperialismo-petrolero-tomo-i.pdf', 'https://www.petroleoydesarrollo.com/investigacion-publicaciones-obras', '© Fondo Editorial Salvador de la Plaza (1975)', 24, true),
+  ('El imperialismo petrolero y la Revolución Venezolana. Tomo II', 'Comisión Ideológica de Ruptura', 'Antiimperialista', 0.5, '#6d4c2f',
+   'Las ganancias extraordinarias y la soberanía nacional: las relaciones entre el imperialismo petrolero y el Estado venezolano a partir de la renta petrolera (Editorial Ruptura, 1977).',
+   'imperialismo-petrolero-tomo-ii.pdf', 'https://www.petroleoydesarrollo.com/investigacion-publicaciones-obras', '© Editorial Ruptura (1977)', 25, true)
 on conflict (title) do update set
   author = excluded.author,
   corriente = excluded.corriente,

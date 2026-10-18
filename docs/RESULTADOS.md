@@ -19,7 +19,7 @@ Informe de estado del trabajo. La administración de pedidos se gestiona
   `cartRows`, `cartTitles`, `saveCart`, `loadCart`. Se limpia al cerrar el pedido.
 - **Supabase (proyecto `uzqadthbjhhdhoqlnupn`).**
   - `orders` / `order_items` + RLS insert-only + RPC `registrar_pedido`.
-  - `books` / `reviews` / `section_events`; catálogo sembrado (24 filas).
+  - `books` / `reviews` / `section_events`; catálogo sembrado (26 filas).
   - `solicitudes` (correo del solicitante + ref. `GR-XXXXXX` en descargas gratuitas) + RLS insert-only.
   - Bucket privado `libros`.
 - **Edge Function `entregar`** desplegada: valida correo + `status='paid'` y
@@ -54,7 +54,7 @@ Informe de estado del trabajo. La administración de pedidos se gestiona
 ## 4. Verificación (evidencia)
 
 - `node --check assets/js/*.js` → OK.
-- Navegador: catálogo carga 24 libros desde Supabase; **0 errores** en consola.
+- Navegador: catálogo carga 26 libros desde Supabase; **0 errores** en consola.
 - `saveOrder` → HTTP 200; pedidos reales `pending_review` creados.
 - `entregar`: `not_found` (código inexistente), `forbidden` (correo no coincide),
   `paid` → `{status:"paid", links:[… kind:"none"]}` (bucket aún vacío).
