@@ -55,7 +55,7 @@ Sitio estático sin build: importa el repositorio en Vercel (framework **Other**
 GitHub Pages es un servidor estático: el pago actual es una **demostración**. Opciones sin servidor propio:
 - **PayPal.me** (ya integrado): la pestaña PayPal abre `https://paypal.me/{PAYPAL_USER}/{importe}USD`. Cambia `pago.paypal` en `assets/js/config.js` (por defecto `morraldigital`). El sufijo `USD` fija la divisa del importe.
 - **Pago Móvil** (ya integrado, cobro manual): la pestaña «Pago Móvil» muestra los datos del cobro y el importe convertido a **Bs**. Configura en `assets/js/config.js` → `pago`:
-  - `pago.pagomovil` — `banco`, `codigo` (0175 = Banco Digital de los Trabajadores), `telefono`, `cedula`, `titular`, `qr`.
+  - `pago.pagomovil` — `banco`, `codigo` (0105 = Banco Mercantil), `telefono`, `cedula`, `titular`, `qr`.
   - `pago.whatsapp` — número destino del comprobante, formato internacional sin `0` (p. ej. `584268901582`).
   - `pago.vesRate` — respaldo si fallan las APIs de tasa (`0` = sin respaldo).
   La tasa es la **oficial del BCV**, consultada automáticamente vía DolarApi (sin clave y con CORS) con respaldo local. El pedido queda **pendiente de verificación** hasta que confirmes el comprobante; la entrega es con URLs firmadas (ver «Entrega protegida»).

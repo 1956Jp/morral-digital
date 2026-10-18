@@ -13,7 +13,7 @@ const PAYPAL_USER=_pago.paypal||"morraldigital";
 const ZINLI_USER=_pago.zinli||"";
 const paypalLink=a=>`https://paypal.me/${PAYPAL_USER}/${a.toFixed(2)}USD`;
 // Pago Móvil (manual, sin backend): datos del cobro y destino del comprobante
-const PAGOMOVIL=Object.assign({banco:"Banco Digital de los Trabajadores",codigo:"0175",telefono:"04268901582",cedula:"V-5249473",titular:"Jose de Los Santos Perez Lopez",qr:"assets/img/pagomovil-qr.png"},_pago.pagomovil||{});
+const PAGOMOVIL=Object.assign({banco:"Banco Mercantil",codigo:"0105",telefono:"04268901582",cedula:"V-5249473",titular:"Jose de Los Santos Perez Lopez",qr:"assets/img/pagomovil-qr.png"},_pago.pagomovil||{});
 const WHATSAPP=_pago.whatsapp||"584268901582"; // internacional, sin el 0 inicial
 const VES_RATE=_pago.vesRate||0;              // respaldo si fallan las APIs de tasa (0 = sin respaldo)
 const QR_PM=PAGOMOVIL.qr||"";                 // QR opcional del banco

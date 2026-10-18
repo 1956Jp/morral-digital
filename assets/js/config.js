@@ -66,8 +66,8 @@ window.CFG = {
     whatsapp: "584268901582",       // internacional, sin el 0 inicial
     vesRate: 0,                     // respaldo de tasa Bs/USD si fallan las APIs (0 = sin respaldo)
     pagomovil: {
-      banco: "Banco Digital de los Trabajadores",
-      codigo: "0175",
+      banco: "Banco Mercantil",
+      codigo: "0105",
       telefono: "04268901582",
       cedula: "V-5249473",
       titular: "Jose de Los Santos Perez Lopez",
