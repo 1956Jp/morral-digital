@@ -55,12 +55,12 @@ Sitio estático sin build: importa el repositorio en Vercel (framework **Other**
 GitHub Pages es un servidor estático: el pago actual es una **demostración**. Opciones sin servidor propio:
 - **PayPal.me** (ya integrado): la pestaña PayPal abre `https://paypal.me/{PAYPAL_USER}/{importe}USD`. Cambia `pago.paypal` en `assets/js/config.js` (por defecto `morraldigital`). El sufijo `USD` fija la divisa del importe.
 - **Pago Móvil** (ya integrado, cobro manual): la pestaña «Pago Móvil» muestra los datos del cobro y el importe convertido a **Bs**. Configura en `assets/js/config.js` → `pago`:
-  - `pago.pagomovil` — `banco`, `codigo` (0105 = Banco Mercantil), `telefono`, `cedula`, `titular`, `qr`.
+  - `pago.pagomovil` — `banco`, `codigo` (0105 = Banco Mercantil), `telefono`, `cedula`, `titular`, `link` (web del banco que abre el botón «Abrir Mercantil en línea»; por defecto `https://www.mercantilbanco.com/`), `qr` (imagen opcional; vacío = no se muestra, hoy sin QR).
   - `pago.whatsapp` — número destino del comprobante, formato internacional sin `0` (p. ej. `584268901582`).
   - `pago.vesRate` — respaldo si fallan las APIs de tasa (`0` = sin respaldo).
   La tasa es la **oficial del BCV**, consultada automáticamente vía DolarApi (sin clave y con CORS) con respaldo local. El pedido queda **pendiente de verificación** hasta que confirmes el comprobante; la entrega es con URLs firmadas (ver «Entrega protegida»).
 - **Stripe Payment Links** o **botones de PayPal**: crea un enlace por libro y colócalo en `app.js` en lugar de `done()`.
-- **Cripto** (ya integrado, cobro manual): la pestaña «Cripto» muestra tu **Binance Pay** (`pago.binance` en `config.js`: `id`, `email`, `tlf` públicos) y el total en USDT (1:1 con USD). Igual que el Pago Móvil, el pedido queda **pendiente de verificación**. Por seguridad solo se publican identificadores públicos (nunca claves privadas, frases semilla ni 2FA). QR opcional en `assets/img/binance-qr.png`.
+- **Cripto** (ya integrado, cobro manual): la pestaña «Cripto» muestra tu **Binance Pay** (`pago.binance` en `config.js`: `id`, `email`, `tlf` públicos) y el total en USDT (1:1 con USD). Igual que el Pago Móvil, el pedido queda **pendiente de verificación**. Por seguridad solo se publican identificadores públicos (nunca claves privadas, frases semilla ni 2FA). QR opcional en `assets/img/binance-qr.png` (hoy vacío: no se muestra ni pide la imagen).
 - **MercadoPago** (enlaces de pago) para Latinoamérica.
 Para entregar archivos solo tras el pago, este proyecto usa **Supabase Storage con URLs firmadas** (ver «Entrega protegida» abajo); no hace falta un backend propio. Para cobro *automático* sí se necesita una función serverless con webhook (Stripe/PayPal/MercadoPago).
 

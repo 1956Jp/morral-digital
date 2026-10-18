@@ -13,7 +13,8 @@ const PAYPAL_USER=_pago.paypal||"morraldigital";
 const ZINLI_USER=_pago.zinli||"";
 const paypalLink=a=>`https://paypal.me/${PAYPAL_USER}/${a.toFixed(2)}USD`;
 // Pago Móvil (manual, sin backend): datos del cobro y destino del comprobante
-const PAGOMOVIL=Object.assign({banco:"Banco Mercantil",codigo:"0105",telefono:"04268901582",cedula:"V-5249473",titular:"Jose de Los Santos Perez Lopez",qr:"assets/img/pagomovil-qr.png"},_pago.pagomovil||{});
+const PAGOMOVIL=Object.assign({banco:"Banco Mercantil",codigo:"0105",telefono:"04268901582",cedula:"V-5249473",titular:"Jose de Los Santos Perez Lopez",link:"https://www.mercantilbanco.com/",qr:""},_pago.pagomovil||{});
+const PAGOMOVIL_LINK=PAGOMOVIL.link||"";       // botón «Abrir Mercantil» (plataforma/web del banco)
 const WHATSAPP=_pago.whatsapp||"584268901582"; // internacional, sin el 0 inicial
 const VES_RATE=_pago.vesRate||0;              // respaldo manual si fallan las APIs de tasa (0 = sin respaldo)
 const RATE_MIN=+(_pago.vesRateMin||1),RATE_MAX=+(_pago.vesRateMax||10000000); // rango de cordura Bs/USD
@@ -235,7 +236,8 @@ paypal:`<p>Serás redirigido a PayPal para completar el pago.</p><a class="btn a
 <div class="pm-row"><span>Concepto</span><b>${orderCode}</b><button type="button" class="btn ghost cpy" onclick="copyText('${orderCode}')">Copiar</button></div>
 </div>
 <p class="note" id="pm-rate">Consultando la tasa BCV…</p>
-<img class="pm-qr" src="${QR_PM}" alt="QR de Pago Móvil" onerror="this.remove()">`,crypto:`<p>Paga con <b>Binance Pay</b> (USDT/USDC). El importe es 1:1 con el total en USD.</p>
+${PAGOMOVIL_LINK?`<a class="btn alt" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:10px" href="${PAGOMOVIL_LINK}" target="_blank" rel="noopener">Abrir Mercantil en línea</a>`:""}
+${QR_PM?`<img class="pm-qr" src="${QR_PM}" alt="QR de Pago Móvil" onerror="this.remove()">`:""}`,crypto:`<p>Paga con <b>Binance Pay</b> (USDT/USDC). El importe es 1:1 con el total en USD.</p>
 <div class="pm-data">
 <div class="pm-row"><span>Binance ID</span><b>${BINANCE.id}</b><button type="button" class="btn ghost cpy" onclick="copyText('${BINANCE.id}')">Copiar</button></div>
 <div class="pm-row"><span>Correo</span><b>${BINANCE.email}</b><button type="button" class="btn ghost cpy" onclick="copyText('${BINANCE.email}')">Copiar</button></div>
@@ -244,7 +246,7 @@ paypal:`<p>Serás redirigido a PayPal para completar el pago.</p><a class="btn a
 <div class="pm-row"><span>Concepto</span><b>${orderCode}</b><button type="button" class="btn ghost cpy" onclick="copyText('${orderCode}')">Copiar</button></div>
 </div>
 <p class="note">Seguridad: nunca pedimos claves privadas, frases semilla ni códigos 2FA. Verifica el destinatario antes de pagar.</p>
-<img class="pm-qr" src="${QR_CRYPTO}" alt="QR de Binance Pay" onerror="this.remove()">`}[m];
+${QR_CRYPTO?`<img class="pm-qr" src="${QR_CRYPTO}" alt="QR de Binance Pay" onerror="this.remove()">`:""}`}[m];
 $("pm").innerHTML=`<h2>Pagar ${f(total())}</h2><div class="tabs">${METODOS.map(k=>`<button class="chip ${k==m?"on":""}" onclick="method('${k}')">${t[k]}</button>`).join("")}</div>
 <input type="email" id="em" placeholder="Correo para recibir tus libros" required>${form}
 <button class="btn alt" style="width:100%" onclick="done()">${(m=="bank"||m=="crypto")?"Ya pagué, enviar comprobante":(m=="paypal"||m=="zinli"?"Ya pagué, mostrar descargas":"Confirmar pago")}</button>

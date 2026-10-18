@@ -73,14 +73,15 @@ window.CFG = {
       telefono: "04268901582",
       cedula: "V-5249473",
       titular: "Jose de Los Santos Perez Lopez",
-      qr: "assets/img/pagomovil-qr.png"   // opcional; si no existe, no se muestra
+      link: "https://www.mercantilbanco.com/", // web oficial de Mercantil: abre el botón «Abrir Mercantil» del panel
+      qr: ""                                    // imagen QR opcional (p. ej. "assets/img/pagomovil-qr.png"); vacío = no se muestra
     },
     // Solo identificadores PÚBLICOS. NUNCA claves privadas, semilla ni 2FA.
     binance: {
       id: "755739247",
       email: "abog.joseperez@gmail.com",
       tlf: "04268901582",
-      qr: "assets/img/binance-qr.png"     // opcional
+      qr: ""                                    // imagen QR opcional (p. ej. "assets/img/binance-qr.png"); vacío = no se muestra
     }
   },
 
