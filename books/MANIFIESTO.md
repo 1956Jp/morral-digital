@@ -1,8 +1,11 @@
 # MANIFIESTO — registro de dominio público
 
 Cada libro del catálogo **debe** tener aquí su ficha antes de publicarse.
-Criterio único: **dominio público estricto**. No se admiten licencias NC
-(CC BY-NC / BY-NC-SA) ni obras con copyright vivo.
+Criterio único: **dominio público estricto**. No se admiten **archivos** de
+licencias NC (CC BY-NC / BY-NC-SA) ni obras con copyright vivo: en esos casos
+solo se publica el enlace a la fuente original, siempre gratis (ver «Corriente
+zapatista» y los tomos de *El imperialismo petrolero*). Todo el catálogo es
+gratuito: no se vende nada.
 
 ## Criterio de dominio público
 
@@ -56,19 +59,19 @@ Criterio único: **dominio público estricto**. No se admiten licencias NC
 | La ideología alemana | Karl Marx y Friedrich Engels | 1883 / 1895 | 1953 / 1965 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1846/ideoalemana/index.htm — escrita 1845-46, publicada en 1932; marxists.org | Dominio público | 2026-10-18 |
 | El origen de la familia, la propiedad privada y el Estado | Friedrich Engels | 1895 | 1965 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1880s/origen/index.htm — marxists.org (trad. histórica al español) | Dominio público | 2026-10-18 |
 | Trabajo asalariado y capital | Karl Marx | 1883 | 1953 | Marxista | — (enlace) | www.marxists.org/espanol/m-e/1840s/49-trab2.htm — marxists.org (trad. histórica al español) | Dominio público | 2026-10-18 |
-| El imperialismo petrolero y la Revolución Venezolana. Tomo I | Comisión Ideológica de Ruptura | — | — | Antiimperialista | `imperialismo-petrolero-tomo-i.pdf` | www.petroleoydesarrollo.com/investigacion-publicaciones-obras — obra colectiva dirigida por Ángel Márquez; NO dominio público (derechos en vigor, ~2035); edición de pago por decisión del editor | © Fondo Editorial Salvador de la Plaza (1975) | 2026-10-18 |
-| El imperialismo petrolero y la Revolución Venezolana. Tomo II | Comisión Ideológica de Ruptura | — | — | Antiimperialista | `imperialismo-petrolero-tomo-ii.pdf` | www.petroleoydesarrollo.com/investigacion-publicaciones-obras — obra colectiva (dir. Ángel Márquez); NO dominio público (derechos en vigor, ~2037); edición de pago por decisión del editor | © Editorial Ruptura (1977) | 2026-10-18 |
+| El imperialismo petrolero y la Revolución Venezolana. Tomo I | Comisión Ideológica de Ruptura | — | — | Antiimperialista | `imperialismo-petrolero-tomo-i.pdf` | www.petroleoydesarrollo.com/investigacion-publicaciones-obras — obra colectiva dirigida por Ángel Márquez; NO dominio público (derechos en vigor, ~2035); ofrecido como **lectura gratuita** (archivo y enlace), con disposición a retirarlo del catálogo a solicitud fundada de sus derechohabientes | © Fondo Editorial Salvador de la Plaza (1975) | 2026-10-18 |
+| El imperialismo petrolero y la Revolución Venezolana. Tomo II | Comisión Ideológica de Ruptura | — | — | Antiimperialista | `imperialismo-petrolero-tomo-ii.pdf` | www.petroleoydesarrollo.com/investigacion-publicaciones-obras — obra colectiva (dir. Ángel Márquez); NO dominio público (derechos en vigor, ~2037); ofrecido como **lectura gratuita** (archivo y enlace), con disposición a retirarlo del catálogo a solicitud fundada de sus derechohabientes | © Editorial Ruptura (1977) | 2026-10-18 |
 
-> El catálogo publica **26 títulos**: 8 con archivo (6 de **dominio público**
-> verificados en `books/` — **Ariel**, **Facundo**, **El porvenir de la América
+> El catálogo publica **26 títulos**, todos **gratuitos** (`precio = 0`, sin
+> venta): 8 con archivo (6 de **dominio público** verificados en el bucket
+> privado `libros` — **Ariel**, **Facundo**, **El porvenir de la América
 > Latina** (Sempere, pre-1930), **La República Argentina y el caso de Venezuela**
 > (ed. 1903), **Noli me tángere** y **El Filibusterismo** (Gutenberg, notas de
-> Sempau †1909) — y 2 tomos con **derechos en vigor** ofrecidos como edición de
-> pago: **El imperialismo petrolero y la Revolución Venezolana** (Fondo Editorial
-> Salvador de la Plaza / Ruptura, 1975-1977)) y 18 que son solo enlace a su
-> fuente original. Las fichas marcadas «— (enlace)» se publican con `precio = 0`
-> (botón "Leer gratis") porque no se aloja PDF local. Todo título **sin archivo y
-> sin fuente verificable** está retirado del catálogo (ver abajo) hasta que se
+> Sempau †1909) — y 2 tomos de **El imperialismo petrolero** con © en vigor,
+> ofrecidos como lectura gratuita: se retiran del catálogo a solicitud de sus
+> derechohabientes) y 18 que son solo enlace a su fuente original. Con archivo
+> el botón es «Descargar»; solo enlace, «Leer gratis». Todo título **sin archivo
+> y sin fuente verificable** está retirado del catálogo (ver abajo) hasta que se
 > compruebe una edición de dominio público.
 
 ## Retiradas del catálogo (sin archivo y sin fuente verificable)
@@ -129,10 +132,10 @@ quedan **fuera** de `books/` y no se enlazan:
 
 ## Corriente zapatista contemporánea: solo enlace
 
-Los comunicados del EZLN (1994 en adelante) **no se venden ni se alojan**:
-Radio Zapatista publica bajo CC BY-NC-SA 4.0 (prohíbe lo comercial) y la obra
-sigue en copyright. Se publican como entrada con `precio = 0`, que muestra el
-botón "Leer gratis" y enlaza a la fuente original.
+Los comunicados del EZLN (1994 en adelante) **no se alojan**: Radio Zapatista
+publica bajo CC BY-NC-SA 4.0 (prohíbe lo comercial) y la obra sigue en
+copyright. Todo el catálogo es gratuito; estos textos se publican solo como
+entrada con enlace (botón "Leer gratis"), que abre la fuente original.
 
 | Título | Fuente | Licencia | Tratamiento |
 |---|---|---|---|

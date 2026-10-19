@@ -6,11 +6,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet" referrerpolicy="no-referrer">
-<link rel="stylesheet" href="assets/css/styles.css?v=36"></head><body>
+<link rel="stylesheet" href="assets/css/styles.css?v=37"></head><body>
 <header><div class="wrap"><a class="logo" href="#" id="brand">★ El Morral <span>Digital</span></a>
 <nav><a id="nav-catalogo" href="#catalogo">Catálogo</a><a id="nav-resenas" href="#resenas">Reseñas</a><a id="nav-expansion" href="#expansion">Expansión</a>
-<button class="btn ghost" onclick="openClaim()">Mis descargas</button>
-<button class="btn" onclick="openCart()">Morral (<span id="cnt">0</span>)</button></nav></div></header>
+<button class="btn ghost" onclick="openAportes()">Aportes</button>
+<button class="btn" onclick="openCart()">Tu lista (<span id="cnt">0</span>)</button></nav></div></header>
 
 <div class="hero"><div class="wrap">
 <div class="stars">★ ★ ★ ★ ★</div>
@@ -19,7 +19,7 @@
 <a class="btn hero-cta" href="#catalogo">Explorar el catálogo</a></div></div>
 
 <section id="catalogo"><div class="wrap">
-<h2 id="cat-title">Catálogo libre</h2><p class="sub" id="cat-sub">Obras de dominio público y enlaces libres. Seis títulos se sostienen con un aporte solidario: $1,50 USD por Ariel y Facundo, y $1 USD por El porvenir de la América Latina, La República Argentina y el caso de Venezuela, Noli me tángere y El Filibusterismo; los demás son enlaces gratuitos a su fuente original.</p>
+<h2 id="cat-title">Catálogo libre</h2><p class="sub" id="cat-sub">Todo el catálogo es gratuito: obras de dominio público y enlaces libres, sin pago ni registro para leer. Descarga directa cuando hay archivo; enlace a la fuente original cuando solo existe en línea.</p>
 <div class="filters" id="filters"></div><div class="grid" id="grid"></div>
 <p class="note" id="cat-note" style="margin-top:20px">Nota editorial: solo publicamos obras de dominio público estricto, con archivo y fuente verificados en <b>books/MANIFIESTO.md</b>. Todo título sin archivo y sin fuente comprobable queda retirado del catálogo. Los textos de Fidel Castro, Ho Chi Minh, Che Guevara y Hugo Chávez permanecen en copyright y no se incorporarán. La corriente zapatista contemporánea (EZLN) se ofrece solo como enlace gratuito: Radio Zapatista publica bajo licencia CC BY-NC-SA (sin uso comercial).</p>
 </div></section>
@@ -27,7 +27,7 @@
 <section id="resenas"><div class="wrap"><h2 id="rev-title">Voces contestataria, e insurgentes con morral</h2><p class="sub" id="rev-sub">Reseñas de lectores · las nuevas se revisan antes de publicarse</p>
 <div class="rev">
 <div class="q"><span class="stars">★★★★★</span><br>“Ariel de Rodó, en una edición limpia y legible. Ideal para círculos de estudio.” <br><small>— ejemplo</small></div>
-<div class="q"><span class="stars">★★★★★</span><br>“Pagué por Pago Móvil, envié el comprobante y descargué el libro al celular. Muy cómodo.” <br><small>— ejemplo</small></div>
+<div class="q"><span class="stars">★★★★★</span><br>“Todo el catálogo es gratis: descargué el libro al celular en un clic. Le dejé un aporte para que sigan así.” <br><small>— ejemplo</small></div>
 <div class="q"><span class="stars">★★★★☆</span><br>“Me gustaría ver más autores africanos y asiáticos.” <br><small>— ejemplo</small></div>
 </div>
 <form onsubmit="addRev(event)" style="margin-top:20px;max-width:520px"><b class="logo" style="font-size:16px">Deja tu reseña</b>
@@ -44,12 +44,13 @@
 <footer><div class="wrap" id="foot">★ El Morral Digital · Ideas libres para los pueblos · Obras de dominio público</div></footer>
 
 <div class="over" id="cart" onclick="if(event.target===this)closeAll()"><div class="panel">
-<div class="row"><h2 id="morral-title">Tu morral</h2><button class="btn ghost" onclick="closeAll()">Cerrar</button></div>
-<div id="items"></div><div class="row" style="margin:16px 0"><b>Total</b><span class="price" id="tot">$0.00</span></div>
-<button class="btn alt" style="width:100%" onclick="checkout()">Ir a pagar</button></div></div>
+<div class="row"><h2 id="morral-title">Tu lista de descargas</h2><button class="btn ghost" onclick="closeAll()">Cerrar</button></div>
+<div id="items"></div>
+<button class="btn alt" style="width:100%" onclick="openAportes()">Hacer un aporte</button>
+<button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeAll()">Seguir leyendo</button></div></div>
 
 <div class="over" id="pay" onclick="if(event.target===this)closeAll()"><div class="panel modal" id="pm"></div></div>
 
-<script src="assets/js/config.js?v=36"></script>
-<script src="assets/js/data.js?v=36"></script>
-<script src="assets/js/app.js?v=36"></script></body></html>
+<script src="assets/js/config.js?v=37"></script>
+<script src="assets/js/data.js?v=37"></script>
+<script src="assets/js/app.js?v=37"></script></body></html>

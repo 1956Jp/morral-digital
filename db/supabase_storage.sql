@@ -1,9 +1,9 @@
 -- =====================================================================
 --  EL MORRAL DIGITAL — Storage para la entrega protegida (Fase 2)
 --  ---------------------------------------------------------------------
---  Crea el bucket PRIVADO `libros`, donde viven los PDF/EPUB de pago
---  (ya no en books/, que es un repo público). La entrega se hace con
---  URLs firmadas temporales, generadas por la Edge Function `entregar`
+--  Crea el bucket PRIVADO `libros`, donde viven los PDF/EPUB del catálogo
+--  (ya no en books/, que es un repo público). La descarga es gratuita: las
+--  URLs firmadas temporales las genera la Edge Function `entregar`
 --  (supabase/functions/entregar) con la service_role.
 --
 --  Pégalo en el SQL Editor de Supabase y pulsa Run. Es idempotente.
