@@ -111,19 +111,20 @@ window.CFG = {
   },
 
   // ------------------------------------------------ Correo (EmailJS)
-  // Envío opcional del correo de descarga gratuita (notifyFree): el enlace a
-  // la fuente del libro, con referencia GR-XXXXXX. El antiguo aviso al
-  // administrador ya no se envía (`templateAdmin`/`adminEmail` quedan
-  // reservados). Crea tus plantillas en https://dashboard.emailjs.com/ y
-  // pega aquí los ID.
+  // Envío opcional del correo de descarga gratuita (notifyFree): el enlace al
+  // libro, con referencia GR-XXXXXX. El aviso al administrador ya no se envía
+  // (el flujo de pedidos se retiró). Crea el Service y la plantilla en
+  // https://dashboard.emailjs.com/ y pega aquí los ID.
   // Si `publicKey` o `serviceId` quedan vacíos, se desactiva y el sitio
-  // funciona igual. La `publicKey` es PÚBLICA (va en el navegador): protégela
-  // con el «Allowlist» de orígenes en el panel de EmailJS. NUNCA pongas aquí
-  // la clave privada (accessToken) ni ninguna credencial secreta.
+  // funciona igual (el enlace se muestra en pantalla). La `publicKey` es PÚBLICA
+  // (va en el navegador): protégela con el «Allowlist» de orígenes en el panel.
+  // NUNCA pongas aquí la clave privada (accessToken).
+  // NOTA: si la API responde «404 Account not found», la cuenta dejó de existir
+  // (plan caducado o borrada): hay que reconectar el Service y actualizar los ID.
   emailjs: {
-    publicKey: "kTwN8Sthj84cLVIbV",        // Public Key de la cuenta (pública)
+    publicKey: "bShFKLRuQO7ZjSZlw",         // Public Key de la cuenta (pública)
     serviceId: "service_0xhzzc5",           // Service ID (service_xxx)
-    templateCliente: "template_9a4yync",    // Template ID del acuse/descargas al cliente
+    templateCliente: "template_9a4yync",    // Template ID del correo de descarga gratuita (To Email = {{email}})
     templateAdmin: "template_3w8khjr",      // Template ID del aviso al administrador (hoy sin uso)
     adminEmail: "abogjoseperez014@gmail.com", // tu correo (variable admin_email en notifyFree)
     enviarEnlaces: true     // reservado: el correo de descarga ya no adjunta enlaces de compra

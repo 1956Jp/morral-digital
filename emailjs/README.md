@@ -1,46 +1,49 @@
 # Plantillas de correo (EmailJS)
 
-Correos **automáticos** al **cerrar un pedido** (`done()` → `notifyOrder()`) y al
-pedir una **descarga gratuita** (`freeSend()` → `notifyFree()`), en `assets/js/app.js`.
-Se envían desde la cuenta conectada (la del administrador) vía la API REST de EmailJS
-(`POST https://api.emailjs.com/api/v1.0/email/send`), sin librerías.
+El sitio envía **un solo correo automático**: el de **descarga gratuita**, disparado
+en `freeSend()` → `notifyFree(email, row, code)` de `assets/js/app.js`. Va al
+**solicitante** con el **enlace directo al libro** (campo 7 de la fila) y una
+referencia `GR-XXXXXX`. Se envía desde la cuenta conectada (la del administrador)
+vía la API REST de EmailJS (`POST https://api.emailjs.com/api/v1.0/email/send`),
+sin librerías.
 
-- `plantilla-cliente.html` → **acuse + enlaces a los libros** al cliente/solicitante.
-- `plantilla-admin.html` → **aviso de pago** al administrador.
-
-En ambos casos, el correo del solicitante se guarda en Supabase (pedidos en `orders`;
-descargas gratuitas en `solicitudes`) para poder consultarlo.
+> El antiguo flujo de **pedidos/compras** (y el correo de aviso al administrador
+> `notifyOrder`) **se eliminó** junto con el modelo de pago: el catálogo es 100 %
+> gratuito. Por eso ya **no** se usa `templateAdmin` ni `plantilla-admin.html`
+> (se conservan solo como referencia histórica).
 
 ## Puesta en marcha
 
 1. En [dashboard.emailjs.com](https://dashboard.emailjs.com) conecta un *Email
    Service* (Gmail/Outlook/SMTP…) y copia su **Service ID**.
-2. Crea **dos plantillas** y pega el contenido de cada archivo en el campo
-   *Content*. Ajusta **To Email** y **Subject** así:
+2. Crea **una plantilla** y pega el contenido de `plantilla-cliente.html` en el
+   campo *Content*. Ajusta **To Email** y **Subject** así:
 
    | Plantilla | To Email | Subject |
    | --- | --- | --- |
-   | `plantilla-cliente.html` | `{{email}}` | `Tu morral de ideas libres — Pedido {{order_code}}` |
-   | `plantilla-admin.html` | `abogjoseperez014@gmail.com` | `Nuevo pedido {{order_code}} — {{metodo}}` |
+   | `plantilla-cliente.html` | `{{email}}` | `Tu enlace de descarga — {{items}}` |
 
-3. Copia los **dos Template IDs** y pega en `assets/js/config.js` →
-   `emailjs`: `publicKey`, `serviceId`, `templateCliente`, `templateAdmin`.
+3. Copia la **Public Key**, el **Service ID** y el **Template ID** y pégalos en
+   `assets/js/config.js` → `emailjs`: `publicKey`, `serviceId`, `templateCliente`.
+   (`templateAdmin`/`adminEmail`/`enviarEnlaces` son reservados y hoy no se usan.)
 4. Si `publicKey` o `serviceId` quedan vacíos, EmailJS se desactiva y el sitio
-   funciona igual (`MAIL_ON = false`).
+   funciona igual (`MAIL_ON = false`): el enlace al libro se muestra en pantalla.
 
 ## Variables
 
+Variables que manda `notifyFree` (`{{{enlaces}}}` lleva HTML):
+
 | Variable | Contenido |
 | --- | --- |
-| `{{email}}` / `{{client_email}}` | Correo del cliente (To Email del correo al cliente) |
-| `{{admin_email}}` | Correo del administrador |
-| `{{order_code}}` | Código del pedido (`MD-XXXXXX`) |
-| `{{metodo}}` | Método de pago (Tarjeta, PayPal, Pago Móvil, Cripto, Zinli) |
-| `{{items}}` | Títulos separados por comas |
-| `{{total}}` / `{{moneda}}` | Importe y divisa (`USD`) |
-| `{{monto_bs}}` / `{{tasa_bs}}` | Monto en Bs y tasa BCV (solo Pago Móvil) |
-| `{{enlaces}}` | Enlaces a los libros: en compras, los títulos + el **enlace web** donde se descargan («Mis descargas»); en descargas gratuitas, el enlace directo al libro. Vacío si `enviarEnlaces` es `false` (solo compras). |
-| `{{whatsapp}}` | Enlace `wa.me` para enviar el comprobante |
+| `{{email}}` / `{{client_email}}` | Correo del solicitante (To Email) |
+| `{{admin_email}}` | Correo del administrador (remitente/Reply-To) |
+| `{{order_code}}` | Referencia de la solicitud (`GR-XXXXXX`) |
+| `{{metodo}}` | «Descarga gratuita» |
+| `{{items}}` | Título del libro solicitado |
+| `{{total}}` / `{{moneda}}` | `0.00` / `USD` (el catálogo es gratuito) |
+| `{{monto_bs}}` / `{{tasa_bs}}` | Vacíos en descargas gratuitas |
+| `{{{enlaces}}}` | Bloque HTML con el enlace directo al libro + enlace a la tienda |
+| `{{whatsapp}}` | Enlace `wa.me` para consultas |
 
 Llaves **dobles** = valor escapado; llaves **triples** (`{{{enlaces}}}`) = HTML
 sin escapar. Renderizado condicional: `{{#var}}…{{/var}}` y `{{^var}}…{{/var}}`.
@@ -50,19 +53,29 @@ sin escapar. Renderizado condicional: `{{#var}}…{{/var}}` y `{{^var}}…{{/var
 - La **Public Key** es pública por diseño (va en el navegador). **Nunca** pongas
   la clave privada (`accessToken`) en `config.js`.
 - Limita el uso con el **Allowlist** de orígenes (EmailJS → Account → Security):
-  añade `https://1956jp.github.io` y `http://localhost:8000`.
-- EmailJS limita a **1 envío/segundo**: el código separa los dos correos ~1 s.
+  añade `https://1956jp.github.io` y (si usas Vercel) tu dominio, más
+  `http://localhost:8000` para pruebas locales. **Sin el Allowlist configurado, la
+  cuenta no atenderá las peticiones desde el sitio.**
+- EmailJS limita a **1 envío/segundo** por cuenta.
 - En Vercel, `connect-src` de `vercel.json` ya incluye `https://api.emailjs.com`.
 
 ## Honestidad
 
-El sitio es **estático y no verifica cobros**. En las **compras**, los archivos de
-pago viven en el **bucket privado** `libros` y solo se sirven con URLs firmadas
-cuando el pedido está `paid`. Por eso el correo al cliente **no adjunta archivos ni
-URLs públicas**: incluye los títulos y el **enlace web donde se descarga** («Mis
-descargas»), con el código del pedido y el correo. Con `enviarEnlaces: false` el
-correo al cliente solo lleva el acuse.
+El sitio es **estático**: el correo de descarga gratuita incluye el **enlace
+directo a la fuente** (campo 7 de la fila), no un archivo adjunto. Los libros con
+archivo propio se sirven aparte, en la página, con una **URL firmada** del bucket
+privado `libros` vía la Edge Function `entregar`. El correo del solicitante se
+guarda en la tabla `solicitudes` (RLS de solo-INSERT) para consultarlo desde el
+panel de Supabase.
 
-En las **descargas gratuitas** (títulos de enlace libre) el correo sí lleva el enlace
-directo al libro, y el correo del solicitante se guarda en la tabla `solicitudes`
-(RLS de solo-INSERT) para consultarlo desde el panel de Supabase.
+## Diagnóstico rápido
+
+Si el correo no llega, comprueba en orden:
+
+1. **¿Sigue viva la cuenta?** `curl` a la API con tu Public Key; `404 Account not
+   found` significa que la cuenta/plan caducó o fue eliminada (hay que reconectar).
+2. **Allowlist de orígenes** con el dominio real desde el que se prueba.
+3. **IDs en `config.js`** (`publicKey`, `serviceId`, `templateCliente`) sin
+   espacios ni comillas de más.
+4. **Consola del navegador**: `sendMail()` registra `EmailJS <tpl> HTTP <status>`
+   cuando falla; el sitio no se rompe (best-effort).

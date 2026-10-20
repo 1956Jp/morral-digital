@@ -89,7 +89,7 @@ wa.href=waLink(`Hola, envío mi comprobante de aporte en cripto.\nAporte: ${orde
 // o no hay config, no rompe la confirmación. Límite de EmailJS: 1 envío/segundo.
 async function sendMail(tpl,params){
 if(!MAIL_ON||!tpl)return false;
-try{const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})});if(!r.ok){console.warn("EmailJS",tpl,`HTTP ${r.status}`,await r.text().catch(()=>""));return false}return true}catch(e){console.warn("EmailJS: fallo de red",tpl,e);return false}}
+try{const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:MAIL.serviceId,template_id:tpl,user_id:MAIL.publicKey,template_params:params})});if(!r.ok){const t=await r.text().catch(()=>"");if(r.status===404||/account not found/i.test(t))console.error("EmailJS: la cuenta (Public Key) no existe o fue desactivada. Revisa config.js → emailjs y el panel de EmailJS.");else if(r.status===400&&/public key is invalid/i.test(t))console.error("EmailJS: Public Key inválida. Revisa config.js → emailjs.publicKey.");else if(r.status===403)console.error("EmailJS: origen no permitido (Allowlist). Añade el dominio del sitio en el panel de EmailJS.");else console.warn("EmailJS",tpl,`HTTP ${r.status}`,t);return false}return true}catch(e){console.warn("EmailJS: fallo de red",tpl,e);return false}}
 // ==== Descarga gratuita: registra el correo del solicitante y le manda el enlace ====
 // Guarda el correo en la tabla `solicitudes` (RLS de solo-INSERT: se consulta
 // desde el panel) y envía al solicitante el enlace al libro desde la cuenta del
@@ -200,19 +200,24 @@ set("exp-title",t.expansionTitulo);set("exp-sub",t.expansionSub);
 set("morral-title",t.morralTitulo);set("foot",m.footer);
 set("nav-catalogo",n.catalogo);set("nav-resenas",n.resenas);set("nav-expansion",n.expansion);
 applyTheme();toggleSections()}
+// Escapa los datos del catálogo: `books` viene de Supabase (defensa en
+// profundidad ante XSS almacenado si se relaja la escritura o hay error de datos).
+// El color se valida a hex o nombre/rgb y se usa solo en style (evita `red;…`).
+const colorSafe=c=>{const s=String(c||"").trim();return /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{3,20}|rgba?\([0-9.,\s%]+\)|hsla?\([0-9.,\s%]+\))$/.test(s)?s:"#2f6fb0"};
 function draw(){const cs=["Todos",...new Set(B.map(b=>b[2]))];
-$("filters").innerHTML=cs.map(c=>`<button class="chip ${c==cat?"on":""}" onclick="cat='${c}';draw()" title="${c}">${c}<small>Gratis</small></button>`).join("");
+$("filters").innerHTML=cs.map(c=>`<button class="chip ${c==cat?"on":""}" data-cat="${esc(c)}" onclick="cat=this.dataset.cat;draw()" title="${esc(c)}">${esc(c)}<small>Gratis</small></button>`).join("");
 const ord=(a,b)=>a.b[0].localeCompare(b.b[0],"es");
 $("grid").innerHTML=B.map((b,i)=>({b,i})).filter(o=>cat=="Todos"||o.b[2]==cat).sort(ord).map(({b,i})=>{
-const accion=b[6]?`<button class="btn gratis" onclick="descargar(${i})">${TXT.botonDescargar}</button>`:(b[7]?`<button class="btn gratis" onclick="freeBook(${i})">${TXT.botonGratis}</button>`:`<button class="btn gratis" disabled>Próximamente</button>`);
-return `<div class="book"><div class="cover" style="--c:${b[4]};border-top:5px solid ${b[4]};background:linear-gradient(150deg,${b[4]}1f,${b[4]}4d)">${IC[b[2]]}<span class="cb">${b[2]}</span><b>${b[0]}</b><small>${b[1]}</small></div><div class="bb"><span class="tag">★ ${b[8]||"Dominio público"} · ${b[2]}</span><p>${b[5]}</p><div class="row"><span class="price gratis">Gratis</span>${accion}</div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="add(${i})" title="${TXT.etiquetaMorral}">＋ ${TXT.botonComprar}</button></div></div>`}).join("")}
+const accion=b[6]?`<button class="btn gratis" onclick="descargar(${i})">${esc(TXT.botonDescargar)}</button>`:(b[7]?`<button class="btn gratis" onclick="freeBook(${i})">${esc(TXT.botonGratis)}</button>`:`<button class="btn gratis" disabled>Próximamente</button>`);
+const c=colorSafe(b[4]);
+return `<div class="book"><div class="cover" style="--c:${c};border-top:5px solid ${c};background:linear-gradient(150deg,${c}1f,${c}4d)">${IC[b[2]]}<span class="cb">${esc(b[2])}</span><b>${esc(b[0])}</b><small>${esc(b[1])}</small></div><div class="bb"><span class="tag">★ ${esc(b[8]||"Dominio público")} · ${esc(b[2])}</span><p>${esc(b[5])}</p><div class="row"><span class="price gratis">Gratis</span>${accion}</div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="add(${i})" title="${esc(TXT.etiquetaMorral)}">＋ ${esc(TXT.botonComprar)}</button></div></div>`}).join("")}
 function add(i){const k=B[i][0];if(cart.includes(k))return;cart.push(k);upd();openCart()}
 function rmAt(idx){cart.splice(idx,1);upd()}
 const total=()=>aporte;
 function upd(){cart=cart.filter(k=>rowOf(k));$("cnt").textContent=cart.length;
 $("items").innerHTML=cart.length?cart.map((k,idx)=>{const r=rowOf(k);const i=B.indexOf(r);
 const d=r[6]?`<button class="btn gratis" onclick="descargar(${i})">Descargar</button>`:(r[7]?`<button class="btn gratis" onclick="freeBook(${i})">Leer gratis</button>`:"");
-return `<div class="item"><span>${r[0]}</span><span class="row" style="gap:8px">${d} <a href="#" onclick="rmAt(${idx});return false">✕</a></span></div>`}).join(""):"<p class='sub'>Tu lista está vacía.</p>";
+return `<div class="item"><span>${esc(r[0])}</span><span class="row" style="gap:8px">${d} <a href="#" onclick="rmAt(${idx});return false">✕</a></span></div>`}).join(""):"<p class='sub'>Tu lista está vacía.</p>";
 saveCart()}
 function openCart(){closeAll();$("cart").classList.add("show")}
 function closeAll(){["cart","pay"].forEach(x=>$(x).classList.remove("show"))}
@@ -263,7 +268,8 @@ const n=orderCode=orderCode||newOrder(),amt=total();
 saveAporte(raw).catch(()=>{});
 let wa;
 if(lastMethod=="bank")wa=waLink(`Hola, envío mi comprobante de aporte por Pago Móvil.\nAporte: ${n}\nMonto: ${f(amt)} USD\nBanco: ${PAGOMOVIL.banco} (${PAGOMOVIL.codigo})`);
-else wa=waLink(`Hola, envío mi comprobante de aporte en cripto (Binance).\nAporte: ${n}\nMonto: ${f(amt)} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
+else if(lastMethod=="crypto")wa=waLink(`Hola, envío mi comprobante de aporte en cripto (Binance).\nAporte: ${n}\nMonto: ${f(amt)} USDT\nBinance ID: ${BINANCE.id}\nCorreo: ${BINANCE.email}`);
+else wa=waLink(`Hola, quiero hacer un aporte a El Morral Digital.\nAporte: ${n}\nMonto: ${f(amt)} USD`);
 $("pm").innerHTML=`<h2>¡Gracias, compañero/a!</h2><p>Tu aporte <b>${f(amt)} USD</b> (ref. <b>${n}</b>) ayuda a sostener la tecnología de El Morral Digital.</p><p>Envía el comprobante para confirmarlo.</p><a class="btn wa" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box" href="${wa}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp</a>${em?`<p class="note" style="margin-top:12px">Te escribiremos a <b>${em}</b>.</p>`:""}<button class="btn" style="margin-top:10px" onclick="closeAll()">Cerrar</button>`}
 function addRev(e){e.preventDefault();const n=+$("rs").value;const s=Number.isFinite(n)?Math.min(5,Math.max(1,Math.round(n))):5;
 const nombre=$("rn").value,comentario=$("rt").value;

@@ -1,16 +1,15 @@
 <!--
   =====================================================================
-  EL MORRAL DIGITAL — Plantilla de correo AL CLIENTE (EmailJS)
+  EL MORRAL DIGITAL — Plantilla de correo de DESCARGA GRATUITA (EmailJS)
   ---------------------------------------------------------------------
   Configúrala en el panel de EmailJS (https://dashboard.emailjs.com):
-    · To Email : {{email}}     (destinatario dinámico = correo del cliente)
-    · Subject  : Tu morral de ideas libres — Pedido {{order_code}}
+    · To Email : {{email}}     (destinatario dinámico = correo del solicitante)
+    · Subject  : Tu enlace de descarga — {{items}}
     · Content  : pega TODO lo que va debajo de este comentario.
-  Variables disponibles: {{email}}, {{client_email}}, {{admin_email}},
-    {{order_code}}, {{metodo}}, {{items}}, {{total}}, {{moneda}},
-    {{monto_bs}}, {{tasa_bs}}, {{enlaces}}, {{whatsapp}}, {{pago}}.
+  Variables: {{email}}, {{client_email}}, {{admin_email}}, {{order_code}},
+    {{metodo}}, {{items}}, {{total}}, {{moneda}}, {{monto_bs}}, {{tasa_bs}},
+    {{{enlaces}}} (HTML con el enlace directo al libro), {{whatsapp}}.
   Llaves dobles  = escapadas;  llaves triples = HTML sin escapar.
-  {{{pago}}}/{{#pago}} = bloque solo para compras (no en descargas gratuitas).
   =====================================================================
 -->
 <div style="margin:0;padding:0;background:#f6f1e4;font-family:Georgia,'Times New Roman',serif;color:#231a0a">
@@ -25,70 +24,46 @@
 
       <p style="margin:0 0 12px;font-size:16px">Compañero/a:</p>
       <p style="margin:0 0 16px;line-height:1.55">
-        Tu pedido <b>{{order_code}}</b> ya está en el morral. Gracias por sostener la
-        circulación libre de las ideas: cada libro que sale de aquí es un ladrillo menos
-        para el muro de los que quieren que olvidemos.
+        Aquí tienes el enlace para descargar <b>{{items}}</b>, del catálogo libre de
+        El Morral Digital. Gracias por sostener la circulación libre de las ideas.
       </p>
 
       <table style="width:100%;border-collapse:collapse;font-size:15px;margin:18px 0">
         <tr>
-          <td style="padding:5px 0;color:#6b6250">Pedido</td>
+          <td style="padding:5px 0;color:#6b6250">Referencia</td>
           <td style="padding:5px 0;text-align:right"><b>{{order_code}}</b></td>
         </tr>
-        {{#pago}}
         <tr>
-          <td style="padding:5px 0;color:#6b6250">Método de pago</td>
-          <td style="padding:5px 0;text-align:right">{{metodo}}</td>
-        </tr>
-        {{/pago}}
-        <tr>
-          <td style="padding:5px 0;color:#6b6250;vertical-align:top">Libros</td>
+          <td style="padding:5px 0;color:#6b6250;vertical-align:top">Libro</td>
           <td style="padding:5px 0;text-align:right">{{items}}</td>
         </tr>
-        {{#pago}}
         <tr>
-          <td style="padding:5px 0;color:#6b6250">Total</td>
-          <td style="padding:5px 0;text-align:right"><b>{{total}} {{moneda}}</b></td>
+          <td style="padding:5px 0;color:#6b6250">Precio</td>
+          <td style="padding:5px 0;text-align:right"><b>Gratis</b></td>
         </tr>
-        {{/pago}}
-        {{#monto_bs}}
-        <tr>
-          <td style="padding:5px 0;color:#6b6250">Monto en Bs</td>
-          <td style="padding:5px 0;text-align:right">{{monto_bs}} <span style="color:#8a7a55;font-size:13px">(tasa {{tasa_bs}})</span></td>
-        </tr>
-        {{/monto_bs}}
       </table>
 
-      {{#pago}}
-      <div style="background:#ffe066;color:#3a2c00;padding:12px 14px;border-radius:10px;font-size:15px;line-height:1.45">
-        <b>Para confirmar tu pago</b>, envíanos el comprobante por WhatsApp y lo verificamos.
-      </div>
-      <p style="text-align:center;margin:18px 0">
-        <a href="{{whatsapp}}" style="display:inline-block;background:#a30b0b;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:9px;font-weight:bold;font-size:15px">
-          Enviar comprobante por WhatsApp
-        </a>
-      </p>
-      {{/pago}}
-
       {{#enlaces}}
-      <p style="margin:24px 0 8px;font-size:16px">Tus libros:</p>
+      <p style="margin:24px 0 8px;font-size:16px">Tu enlace de descarga:</p>
       <div style="background:#f4efe0;border:1px dashed #d8c9a3;border-radius:10px;padding:12px 16px;line-height:1.7">
         {{{enlaces}}}
       </div>
       {{/enlaces}}
-      {{^enlaces}}
-      <p style="margin:24px 0 0;line-height:1.55;color:#6b6250">
-        Cuando confirmemos tu pago podrás descargarlos desde la tienda: entra en «Mis descargas» con tu código de pedido y tu correo.
-      </p>
-      {{/enlaces}}
 
-      <p style="margin:24px 0 4px;line-height:1.55">Guarda tu código de pedido: <b>{{order_code}}</b>.</p>
+      <div style="background:#e8f5e9;color:#1b5e20;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.5;margin-top:18px">
+        El proyecto es gratuito y se sostiene con <b>aportes voluntarios</b>. Si quieres
+        colaborar con el desarrollo de la tecnología, usa el botón «Aportes» del sitio.
+        ¡Nunca pedimos claves ni pagos para descargar!
+      </div>
+
+      <p style="margin:24px 0 4px;line-height:1.55">Guarda tu referencia: <b>{{order_code}}</b>.</p>
       <p style="margin:12px 0 0;line-height:1.55">¡Hasta la victoria, siempre!<br><b>El Morral Digital</b></p>
 
       <hr style="border:none;border-top:1px solid #e6dcc4;margin:22px 0 12px">
       <p style="margin:0;font-size:12px;color:#8a8069;line-height:1.5">
-        Recibes este correo porque pediste libros en El Morral Digital.
-        Para soporte, escríbenos por WhatsApp. Obras de dominio público.
+        Recibes este correo porque pediste el enlace de un libro de dominio público
+        en El Morral Digital. Para soporte, escríbenos por
+        <a href="{{whatsapp}}" style="color:#8a8069">WhatsApp</a>.
       </p>
     </div>
   </div>
