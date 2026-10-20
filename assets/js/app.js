@@ -126,20 +126,39 @@ const abrir=b[7]?` <a href="${esc(b[7])}" target="_blank" rel="noopener">abrir e
 msg.innerHTML=enviado?`<p class="note">Listo (ref. <b>${esc(code)}</b>). Enviamos el enlace a <b>${esc(em)}</b>.${abrir}</p>`:`<p class="note">No se pudo enviar el correo (ref. <b>${esc(code)}</b>).${abrir}</p>`}
 // ==== Descarga directa gratuita (bucket privado → URL firmada temporal) ====
 // La Edge Function `entregar` firma el archivo del bucket `libros` sin exigir
-// pago (todo el catálogo es de dominio público). Si no hay Edge Function o
-// falla, se cae al enlace de la fuente (campo 7) cuando exista.
-async function descargar(i){
+// pago (todo el catálogo es de dominio público). Antes de entregar se ofrece un
+// correo OPCIONAL: si se rellena, se registra en `solicitudes` (ref. GR-XXXXXX)
+// y se manda al solicitante una copia con el enlace de la fuente (campo 7).
+// Si la Edge Function falla, se cae al enlace de la fuente cuando exista.
+function descargar(i){
 const b=B[i];if(!b||!b[6]){if(b&&b[7])open(b[7]);return}
 closeAll();$("pay").classList.add("show");
-$("pm").innerHTML=`<h2>${esc(b[0])}</h2><p class="note">${esc(b[1])} · ${esc(b[2])}</p><p class="note">Preparando la descarga…</p><div id="fe-msg"></div>`;
-const msg=document.getElementById("fe-msg");
-if(!SB_FN_ENTREGAR){if(b[7]){open(b[7])}else if(msg)msg.innerHTML="<p class='note'>La descarga directa no está configurada.</p>";return}
+const src=b[7]?`<p class="note">También disponible en su fuente original: <a href="${esc(b[7])}" target="_blank" rel="noopener">abrir enlace</a>.</p>`:"";
+$("pm").innerHTML=`<h2>${esc(b[0])}</h2><p class="note">${esc(b[1])} · ${esc(b[2])}</p>
+<p>Descarga el archivo directamente. Si quieres, deja tu correo para recibir también el enlace de la fuente (opcional).</p>
+<input type="email" id="fe-em" placeholder="Tu correo (opcional)"><button class="btn alt" style="width:100%" onclick="descargarFile(${i})">Descargar</button>${src}<div id="fe-msg"></div>`}
+async function descargarFile(i){
+const b=B[i];if(!b)return;
+const inp=document.getElementById("fe-em"),msg=document.getElementById("fe-msg");
+const em=((inp&&inp.value)||"").trim();
+if(em&&!em.includes("@")){if(inp)inp.focus();if(msg)msg.innerHTML="<p class='note'>Ese correo no parece válido; corrige o déjalo vacío para descargar igual.</p>";return}
+if(msg)msg.innerHTML="<p class='note'>Preparando la descarga…</p>";
+if(!SB_FN_ENTREGAR){
+  if(b[7]){open(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}
+  else if(msg)msg.innerHTML="<p class='note'>La descarga directa no está configurada.</p>";
+  return}
 let url="";
 try{const r=await fetch(SB_FN_ENTREGAR,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({archivo:b[6]})});const data=await r.json();url=(data&&data.url)||""}catch(e){}
-if(url){const a=document.createElement("a");a.href=url;a.download=b[6];a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
-if(msg)msg.innerHTML=`<p class="note">Descarga iniciada.</p>${b[7]?`<a class="btn ghost" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:8px" href="${esc(b[7])}" target="_blank" rel="noopener">Ver en la fuente original</a>`:""}`}
-else if(b[7]){open(b[7])}
-else if(msg)msg.innerHTML="<p class='note'>No se pudo preparar la descarga. Inténtalo más tarde.</p>"}
+if(!url){if(b[7]){open(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}else if(msg)msg.innerHTML="<p class='note'>No se pudo preparar la descarga. Inténtalo más tarde.</p>";return}
+const a=document.createElement("a");a.href=url;a.download=b[6];a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+let aviso="";
+if(em){
+  const code=newFree();
+  saveSolicitud(em,b,code).catch(()=>{});
+  let enviado=false;try{enviado=await notifyFree(em,b,code)}catch(e){}
+  aviso=enviado?` Enviamos una copia con el enlace a <b>${esc(em)}</b> (ref. <b>${esc(code)}</b>).`:` Se registró tu solicitud (ref. <b>${esc(code)}</b>), pero no pudimos enviar el correo.`;
+}
+if(msg)msg.innerHTML=`<p class="note">Descarga iniciada.${aviso}</p>${b[7]?`<a class="btn ghost" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:8px" href="${esc(b[7])}" target="_blank" rel="noopener">Ver en la fuente original</a>`:""}`}
 const open=u=>{const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()};
 // ==== Supabase: catálogo, reseñas y actividad por sección ====
 // Mismo estilo que getRate() (REST/PostgREST, sin librerías). Todo es
