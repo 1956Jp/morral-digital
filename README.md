@@ -12,7 +12,7 @@ Librería digital de pensamiento bolivariano, martiano, zapatista, marxista, ant
 - `books/MANIFIESTO.md` – registro de dominio público (fuente, licencia, verificación)
 - `emailjs/` – plantillas de correo listas para pegar en EmailJS (opcional)
 - `supabase/functions/entregar/` – Edge Function que firma URLs de descarga gratuita
-- `db/supabase_pedidos.sql` – esquema SQL de pedidos históricos (opcional, ya no se usa en el flujo)
+- `db/supabase_pedidos.sql` – esquema SQL de pedidos **histórico y retirado** (NO ejecutar); sus tablas ya se eliminaron con `db/supabase_limpieza.sql`
 - `db/supabase_secciones.sql` – esquema SQL para catálogo, reseñas y actividad por sección (opcional)
 - `db/supabase_storage.sql` – crea el bucket privado `libros` para los archivos descargables (opcional)
 - `db/supabase_solicitudes.sql` – esquema SQL de solicitudes/contactos (opcional)

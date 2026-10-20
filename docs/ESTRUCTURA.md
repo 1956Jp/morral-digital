@@ -18,7 +18,8 @@ build, ni `package.json`, ni tests automatizados. "Backend" aquí significa
 
 | Archivo | Rol |
 | --- | --- |
-| `db/supabase_pedidos.sql` | Esquema **histórico** de pedidos (`orders` / `order_items`, RPC `registrar_pedido`): ya no se usa en el flujo (no hay pedidos). |
+| `db/supabase_pedidos.sql` | Esquema **histórico** de pedidos (`orders` / `order_items`, RPC `registrar_pedido`): **retirado y eliminado de la base** (ver `db/supabase_limpieza.sql`). No ejecutar. |
+| `db/supabase_limpieza.sql` | Saneado: elimina el modelo de pedidos y aplica mínimo privilegio de `anon` en `public`. |
 | `db/supabase_secciones.sql` | Tablas `books` / `reviews` / `section_events` (catálogo, reseñas y actividad). |
 | `db/supabase_solicitudes.sql` | Tabla `solicitudes`: descargas gratuitas (correo + ref. `GR-XXXXXX`) y aportes (`book_title="Aporte"` + ref. `MD-XXXXXX`); RLS de solo-`INSERT`. |
 | `db/supabase_storage.sql` | Bucket **privado** `libros` (descarga gratuita; sin acceso `anon`). |

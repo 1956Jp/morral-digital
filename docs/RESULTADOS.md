@@ -38,10 +38,17 @@ voluntarios** y descarga libre vía Edge Function.
   gratuita, con disposición a retirarlos a solicitud de sus derechohabientes;
   *La República Argentina y el caso de Venezuela* queda solo como enlace a su
   fuente por exceder el límite de subida).
-- **Supabase.** `orders`/`order_items`/`registrar_pedido` quedan **fuera del
-  flujo** (esquema histórico en `db/supabase_pedidos.sql`); `books` quedó con
+- **Supabase.** `orders`/`order_items`/`registrar_pedido` (esquema histórico)
+  **se eliminaron de la base** con `db/supabase_limpieza.sql`; `books` quedó con
   `price = 0`. `solicitudes` ahora registra **descargas gratuitas**
   (ref. `GR-XXXXXX`) y **aportes** (ref. `MD-XXXXXX`).
+- **Saneado de seguridad (mínimo privilegio).** `db/supabase_limpieza.sql`
+  revoca todos los privilegios de `anon` en `public` y deja solo
+  `SELECT` en `books`/`reviews` e `INSERT` en `reviews`/`section_events`/
+  `solicitudes` (sin `DELETE`/`UPDATE`/`TRUNCATE`/`REFERENCES`/`TRIGGER` ni
+  `EXECUTE`). Verificado: `anon` no lee `solicitudes`/`section_events` ni
+  escribe en `books` (401); catálogo y reseñas siguen en 200/201; 0 avisos
+  de seguridad.
 - **Fase 1 — lista persistente.** Se guarda en `localStorage`
   (`morral-digital:cart:v1`) por **título** (id estable). Helpers `rowOf`,
   `cartRows`, `cartTitles`, `saveCart`, `loadCart`.

@@ -1,13 +1,14 @@
 -- =====================================================================
---  EL MORRAL DIGITAL — Pedidos en Supabase
+--  EL MORRAL DIGITAL — Pedidos en Supabase  ⛔ RETIRADO (NO EJECUTAR)
 --  ---------------------------------------------------------------------
---  Pégalo tal cual en el SQL Editor de Supabase y pulsa Run.
---  Crea las tablas `orders` y `order_items`, políticas RLS de solo-INSERT
---  para el navegador (rol `anon`) y la función atómica `registrar_pedido`
---  que llama el sitio desde assets/js/app.js (sin librerías, vía REST).
---  La anonKey es PÚBLICA: la seguridad es la RLS. NUNCA exponer la
---  service_role. Para leer pedidos usa el panel (Table Editor) o la
---  service_role desde el servidor.
+--  HISTÓRICO: este esquema (tablas `orders`/`order_items` + RPC
+--  `registrar_pedido`) quedó FUERA del flujo cuando el catálogo pasó a ser
+--  100 % gratuito. Las tablas, políticas y la función YA SE ELIMINARON de
+--  la base con la migración de saneado (ver `db/supabase_limpieza.sql`).
+--
+--  Se conserva solo como referencia; NO volver a ejecutarlo: recrearía una
+--  superficie de escritura pública sin uso (y un RPC ejecutable por `anon`).
+--  El registro vigente es `db/supabase_solicitudes.sql` (descargas + aportes).
 -- =====================================================================
 
 create table public.orders (
