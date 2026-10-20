@@ -14,7 +14,7 @@ Comprobar a mano: filtros, añadir/quitar de la **lista de descargas**, descarga
 
 ## Estructura que no se ve en los nombres
 - `index.html` carga `assets/js/config.js`, luego `assets/js/data.js` y luego `assets/js/app.js` como **scripts clásicos con globales** (sin módulos ESM). El orden importa: `CFG` (config) se define en `config.js`, `B` (catálogo) en `data.js`, y `app.js` los consume.
-- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=37`, `config.js?v=37`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
+- **Cacheo:** los assets se referencian con `?v=N` (`styles.css?v=38`, `config.js?v=38`…). Al cambiar CSS/JS, **sube el número** en `index.html` (todos los `?v=` al mismo valor) o el navegador seguirá mostrando la versión vieja (los servidores estáticos no mandan `Cache-Control`).
 
 ## Configuración y extensión (`assets/js/config.js`)
 Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en `app.js` si falta el archivo). Editar aquí antes de tocar `app.js`:
@@ -36,7 +36,7 @@ Casi todo el sitio se parametriza desde el objeto global `CFG` (con respaldo en 
 - Los chips de filtro salen de los datos: **una corriente sin libros desaparece del filtro** (hoy las 7 tienen contenido).
 - `3 precio` es **0 en las 26 filas**: todo el catálogo es gratuito (no hay precios ni venta). La ficha siempre muestra «Gratis».
 - Con `6 archivo` el botón es **Descargar** (`descargar(i)` → Edge Function `entregar` → URL firmada; si falla, se cae al enlace del campo 7). Sin archivo pero con `7 fuenteURL`, el botón es **Leer gratis** (`freeBook()`: pide el correo del solicitante, lo guarda en `solicitudes` con ref. `GR-XXXXXX` y envía el enlace por EmailJS con `notifyFree()`). Ni archivo ni fuente = «Próximamente» (no debería publicarse, ver «Añadir un libro»).
-- `6 archivo` = nombre del objeto dentro del bucket **privado** `libros` de Supabase Storage (sin ruta). Hoy 8 libros con archivo: `ariel.pdf`, `facundo.pdf`, `ugarte-el-porvenir.pdf`, `drago-caso-venezuela.pdf`, `noli-me-tangere.epub`, `el-filibusterismo.epub`, `imperialismo-petrolero-tomo-i.pdf`, `imperialismo-petrolero-tomo-ii.pdf`. Los PDF/EPUB **no** se publican en `books/` (ver «Descarga libre»).
+- `6 archivo` = nombre del objeto dentro del bucket **privado** `libros` de Supabase Storage (sin ruta). Hoy 7 libros con archivo: `ariel.pdf`, `facundo.pdf`, `ugarte-el-porvenir.pdf`, `noli-me-tangere.epub`, `el-filibusterismo.epub`, `imperialismo-petrolero-tomo-i.pdf`, `imperialismo-petrolero-tomo-ii.pdf`. Los PDF/EPUB **no** se publican en `books/` (ver «Descarga libre»).
 - `8 licencia` alimenta el sello de la ficha (`★ {licencia} · {corriente}`); vacío → "Dominio público".
 - `add(i)` mete **cualquier** título en la lista de descargas (no valida precio): es una lista, no un carrito de compra.
 
@@ -64,7 +64,7 @@ El catálogo es gratuito; el antiguo panel de pago ahora recibe **aportes volunt
 - En Vercel, `connect-src` de `vercel.json` incluye `https://*.supabase.co`. En GitHub Pages no hay CSP que ajustar.
 
 ## Descarga libre (bucket privado + Edge Function)
-Los 8 libros con archivo se sirven desde un **bucket privado** `libros` (no desde `books/`, que es un repo público). No hay pago ni pedido: cualquiera puede descargarlos.
+Los 7 libros con archivo se sirven desde un **bucket privado** `libros` (no desde `books/`, que es un repo público). No hay pago ni pedido: cualquiera puede descargarlos.
 - **Bucket:** `libros` (privado, `public=false`). Sin políticas para `anon`: nadie lo lee/escribe directo; solo la `service_role` firma URLs. Esquema en `db/supabase_storage.sql`.
 - **Subida de archivos (manual):** con el script `db/subir_libros.sh` (`SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… ./db/subir_libros.sh`), o desde el *Storage* del panel, o con la CLI (`supabase storage cp books/ariel.pdf ss:///libros/ariel.pdf`). Los archivos locales se conservan para subirlos pero **no se versionan** (`.gitignore`).
 - **Edge Function `entregar`** (`supabase/functions/entregar/index.ts`): recibe `{archivo}` o `{archivos:[...]}`, valida el nombre (`^[A-Za-z0-9._-]+$`, sin rutas) y que el objeto exista en el bucket, y devuelve `{url, expires_in}` (o `{links:[{archivo,url}]}`) con URLs firmadas (~1 h). Se despliega con `supabase functions deploy entregar` (`verify_jwt=true`; `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` las inyecta Supabase). La `service_role` NUNCA toca el navegador.

@@ -22,8 +22,8 @@ Thumbs.db
 # Vercel
 .vercel/
 
-# Libros de pago: ya NO se publican en el repo (se sirven desde el bucket
-# privado `libros` de Supabase con URLs firmadas; ver AGENTS.md «Fase 2»).
+# Libros con archivo: NO se publican en el repo (se sirven desde el bucket
+# privado `libros` de Supabase con URLs firmadas; ver AGENTS.md «Descarga libre»).
 # Los archivos locales se conservan solo para subirlos al bucket.
 books/ariel.pdf
 books/facundo.pdf
@@ -31,3 +31,5 @@ books/ugarte-el-porvenir.pdf
 books/drago-caso-venezuela.pdf
 books/noli-me-tangere.epub
 books/el-filibusterismo.epub
+books/imperialismo-petrolero-tomo-i.pdf
+books/imperialismo-petrolero-tomo-ii.pdf

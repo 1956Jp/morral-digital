@@ -33,9 +33,11 @@ voluntarios** y descarga libre vía Edge Function.
   `{archivo}` o `{archivos:[...]}`, valida el nombre (`^[A-Za-z0-9._-]+$`) y
   devuelve `{url, expires_in}` (URLs firmadas ~1 h) sin exigir pedido, correo
   ni `paid`. `descargar(i)` la usa desde la ficha y la lista; si falla, cae al
-  enlace de la fuente (campo 7). 8 libros con archivo en el bucket privado
+  enlace de la fuente (campo 7). 7 libros con archivo en el bucket privado
   `libros` (los tomos de *El imperialismo petrolero* se ofrecen como lectura
-  gratuita, con disposición a retirarlos a solicitud de sus derechohabientes).
+  gratuita, con disposición a retirarlos a solicitud de sus derechohabientes;
+  *La República Argentina y el caso de Venezuela* queda solo como enlace a su
+  fuente por exceder el límite de subida).
 - **Supabase.** `orders`/`order_items`/`registrar_pedido` quedan **fuera del
   flujo** (esquema histórico en `db/supabase_pedidos.sql`); `books` quedó con
   `price = 0`. `solicitudes` ahora registra **descargas gratuitas**
@@ -60,16 +62,16 @@ voluntarios** y descarga libre vía Edge Function.
 
 | # | Pendiente | Detalle |
 | --- | --- | --- |
-| B1 | **Subir los 8 archivos al bucket `libros`** | `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… ./db/subir_libros.sh` (o panel/CLI). Hasta entonces, `descargar()` cae al enlace de la fuente (campo 7). |
+| B1 | **Subir los archivos al bucket `libros`** | **Hecho:** 7 de 8 archivos subidos y verificados (URL firmada → descarga íntegra). `La República Argentina y el caso de Venezuela` (69 MB) excede el límite global de subida (50 MB, plan Free): queda solo como enlace a su fuente; se subiría si se eleva el límite del proyecto. Script: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… ./db/subir_libros.sh`. |
 | B2 | **Probar el envío de EmailJS** | Los IDs ya están en `config.js` (`MAIL_ON=true`). Falta verificar en el panel el *Allowlist* de orígenes y probar el correo de descarga gratuita (comprobar que el correo del solicitante entra en `solicitudes`). |
-| B3 | **Push a GitHub** | Falta credencial: registrar la llave SSH o usar un PAT con scope `repo`. |
+| B3 | ~~Push a GitHub~~ | **Hecho:** `main` empujado a `origin/main` (commit `acbad34`). |
 | N1 | Reescribir historia (opcional) | Una edición descartada con copyright sigue en el historial (`b8e7945`); requiere force-push. |
 
 ## 4. Verificación (evidencia)
 
 - `node --check assets/js/*.js` → OK.
-- Navegador: catálogo carga 26 libros (todos «Gratis») desde Supabase; **0 errores** en consola.
-- `entregar` (modelo actual): valida el nombre del archivo y devuelve URL firmada; sin bucket/objeto → error claro.
+- Navegador: catálogo carga 26 libros (todos «Gratis») desde Supabase; 7 con botón **Descargar** (archivo en el bucket) y 19 con **Leer gratis** (enlace); **0 errores** en consola.
+- `entregar` (modelo actual): valida el nombre del archivo y devuelve URL firmada; sin bucket/objeto → error claro. Verificado end-to-end: URL firmada de `ariel.pdf` descarga 9.046.532 B idénticos al original.
 - Descarga gratuita (`freeSend`) → ref. `GR-XXXXXX` en `solicitudes` y correo con el enlace de la fuente.
 - Aviso de Supabase: 0 de seguridad; solo INFO de índices sin uso.
 - *(Modelo anterior, histórico:)* `saveOrder` → HTTP 200 con pedidos `pending_review`; `entregar` exigía correo + `status='paid'` y devolvía `kind:"none"` con el bucket vacío; el reclamo de pedido pendiente mostraba «Tu pago aún no está verificado…».
@@ -84,8 +86,8 @@ voluntarios** y descarga libre vía Edge Function.
 
 ## 6. Próximos pasos
 
-1. **B1** → subir los 8 libros al bucket; probar la descarga real (URLs firmadas).
+1. **B1** → hecho (7/8 subidos y verificados); solo `La República Argentina y el caso de Venezuela` queda como enlace por el límite de tamaño.
 2. **B2** → verificar el *Allowlist* de EmailJS y probar el correo de descarga gratuita.
-3. **B3** → autorizar el push y desplegar en GitHub Pages.
+3. **B3** → hecho (push a `origin/main`); activar GitHub Pages.
 4. **Fase 0** → saneado (escapado XSS en `draw()`, contraste en modo oscuro,
    Esc/trampa de foco/etiquetas en modales).

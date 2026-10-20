@@ -41,7 +41,7 @@ gratuito: no se vende nada.
 | Ariel | José Enrique Rodó | 1917 | 1987 | Latinoamericano | `ariel.pdf` | archive.org/details/arielrod00roduoft — Houghton Mifflin, 1922 (trad. F. J. Stimson, †1943) | Dominio público | 2026-10-09 |
 | Facundo | Domingo F. Sarmiento | 1888 | 1958 | Latinoamericano | `facundo.pdf` | archive.org/details/facundos00sarmuoft — Biblioteca Argentina / La Facultad, 1921 | Dominio público | 2026-10-09 |
 | El porvenir de la América Latina | Manuel Ugarte | 1951 | 2021 | Antiimperialista | `ugarte-el-porvenir.pdf` | F. Sempere y Cía., Valencia (pre-1930); espejo siese.org | Dominio público | 2026-10-12 |
-| La República Argentina y el caso de Venezuela | Luis María Drago | 1921 | 1991 | Antiimperialista | `drago-caso-venezuela.pdf` | bibliotecadigital.gob.ar/items/show/847 — ed. 1903 (Coni Hermanos, Buenos Aires) | Dominio público | 2026-10-12 |
+| La República Argentina y el caso de Venezuela | Luis María Drago | 1921 | 1991 | Antiimperialista | — (enlace) | bibliotecadigital.gob.ar/items/show/847 — ed. 1903 (Coni Hermanos, Buenos Aires) | Dominio público | 2026-10-12 |
 | Noli me tángere | José Rizal | 1896 | 1966 | Antiimperialista | `noli-me-tangere.epub` | gutenberg.org/ebooks/47584 — ed. con notas de R. Sempau (†1909) | Dominio público | 2026-10-12 |
 | El Filibusterismo | José Rizal | 1896 | 1966 | Antiimperialista | `el-filibusterismo.epub` | gutenberg.org/ebooks/30903 | Dominio público | 2026-10-12 |
 | Manifiesto de Cartagena | Simón Bolívar | 1830 | 1901 | Bolivariano | — (enlace) | es.wikisource.org/wiki/Manifiesto_de_Cartagena | Dominio público | 2026-10-12 |

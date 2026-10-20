@@ -24,6 +24,8 @@ files=(
   drago-caso-venezuela.pdf
   noli-me-tangere.epub
   el-filibusterismo.epub
+  imperialismo-petrolero-tomo-i.pdf
+  imperialismo-petrolero-tomo-ii.pdf
 )
 
 for f in "${files[@]}"; do
