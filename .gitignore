@@ -33,3 +33,7 @@ books/noli-me-tangere.epub
 books/el-filibusterismo.epub
 books/imperialismo-petrolero-tomo-i.pdf
 books/imperialismo-petrolero-tomo-ii.pdf
+
+# Python
+__pycache__/
+*.pyc
