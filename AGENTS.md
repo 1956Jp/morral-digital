@@ -80,4 +80,4 @@ Esquema `db/supabase_recursos.sql` (aplicado): tablas `materias`/`grados` (catá
 - Modo oscuro solo por CSS (`prefers-color-scheme` + `:root[data-theme="dark"]`); no hay interruptor. La interfaz está en español.
 
 ## Referencias
-- `docs/ESTRUCTURA.md` (mapa de archivos y flujo), `docs/RESULTADOS.md` (informe), `docs/INFORME-SEGURIDAD.md`, `books/MANIFIESTO.md` (obligatorio por título), `emailjs/README.md`, `README.md`.
+- `docs/ESTRUCTURA.md` (mapa de archivos y flujo), `docs/RESULTADOS.md` (informe), `docs/PENDIENTES.md` (EmailJS 404 a reconectar, copia externa por sudo, próximos pasos), `docs/INFORME-SEGURIDAD.md`, `books/MANIFIESTO.md` (obligatorio por título), `emailjs/README.md`, `README.md`.
