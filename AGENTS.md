@@ -49,6 +49,14 @@ Casi todo se parametriza en `CFG`; edita aquí antes de tocar `app.js`:
 - Subida: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… ./db/subir_libros.sh`, panel Storage o CLI. `books/` solo contiene docs; los archivos no se versionan (`.gitignore`) y de los 7 solo hay copia local de `facundo.pdf` en `../_descartados-morral/` (los demás ya están en el bucket).
 - Si la función falla, `descargar()` cae al enlace de la fuente (campo 7). El correo es **opcional** en «Descargar»; en «Leer gratis» es obligatorio.
 
+## Recursos educativos (dominio nuevo en Supabase)
+Esquema `db/supabase_recursos.sql` (aplicado): tablas `materias`/`grados` (catálogos FK, lectura pública) y `recursos`, espejo de la interfaz `Recurso` (TypeScript): `id uuid` PK, `titulo`/`autor` NOT NULL, `descripcion`/`portada_url` opcional, `materia_id`/`grado_id` (FK), `idioma` CHECK `es|en|otro`, `archivo_url`/`archivo_tipo`/`archivo_tamano` (URL pública directa, NO el bucket `libros`), `etiquetas text[]`, `estado` CHECK `borrador|pendiente|aprobado|rechazado`, `publicado_por` (hoy texto `'anon'`), `creado_en`/`actualizado_en` (trigger `recursos_touch`).
+
+- Flujo de moderación (verificado por REST): `anon` lee **solo `estado='aprobado'`** y solo inserta **`pendiente`** (RLS `with check`); INSERT con `aprobado`/`borrador`/`rechazado` → 401; FK inválida → 409; `anon` NO puede borrar ni actualizar. Moderación (aprobar/rechazar/borrador) solo por panel/service_role.
+- Los catálogos van con seed mínimo editable (`general`, `matematicas`… / `primaria-1..6`, `media-1..5`); sin FK válido no hay INSERT posible.
+- **Aún no hay UI en el sitio** para recursos: no conectar frontend sin una vista real. Delete las policies sigue el patrón de `reviews`; la capa de entrega de URL directa no usa la Edge Function `entregar`.
+- Migraciones MCP aplicadas: `morral_recursos`, `morral_recursos_touch_fix`.
+
 ## Aportes (Pago Móvil / Binance Pay, manual)
 - No hay pedido: el catálogo es gratis y **la descarga nunca depende del aporte**. `openAportes()` (`checkout()` es alias) abre la primera pestaña de `METODOS`, con concepto `MD-XXXXXX` fijo.
 - La tasa USD→VES es **solo BCV oficial** vía `ve.dolarapi.com` (con respaldo `/v1/dolares` filtrando `fuente=="oficial"`); descarta valores fuera de `[vesRateMin, vesRateMax]`; si no hay válida usa `vesRate` o «tasa no disponible».
