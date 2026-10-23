@@ -15,7 +15,7 @@ Gmail requiere una «contraseña de aplicación» (no la contraseña normal).
 Protonmail requiere Proton Bridge (SMTP local en 127.0.0.1:1025).
 El cuerpo HTML se genera desde docs/INFORME-SEGURIDAD.md.
 """
-import os, smtplib, ssl, sys
+import os, smtplib, ssl, sys, tempfile
 from email.message import EmailMessage
 from email.utils import formataddr
 
@@ -28,7 +28,9 @@ MAIL_TO = os.environ.get("MORRAL_MAIL_TO", "")
 SUBJECT = os.environ.get("MORRAL_MAIL_SUBJECT",
                          "Informe técnico — El Morral Digital (seguridad y correos)")
 
-HTML_PATH = os.environ.get("MORRAL_INFORME_HTML", "/tmp/opencode/informe-email.html")
+HTML_PATH = os.environ.get("MORRAL_INFORME_HTML",
+                           os.path.join(tempfile.gettempdir(),
+                                        "informe-email.html"))
 MD_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "INFORME-SEGURIDAD.md")
 
 if not (HOST and USER and PASS and MAIL_TO):

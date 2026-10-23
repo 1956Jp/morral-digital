@@ -10,8 +10,8 @@ voluntarios** y descarga libre vía Edge Function.
 | Fase | Descripción | Estado |
 | --- | --- | --- |
 | Fase 1 | Lista de descargas persistente en `localStorage` (guarda **títulos**, no índices) | ✅ Completada y verificada |
-| Iteración actual | Catálogo 100 % gratuito + aportes voluntarios; descarga libre vía Edge Function; morral como lista de descargas | ✅ Implementada; falta subir archivos y verificar correo |
-| Fase 0 | Endurecimiento (XSS, accesibilidad, contraste) | ⬜ Pendiente |
+| Iteración actual | Catálogo 100 % gratuito + aportes voluntarios; descarga libre vía Edge Function; morral como lista de descargas | ✅ Implementada; archivos subidos; falla probar el correo (B2) |
+| Fase 0 | Endurecimiento (XSS, accesibilidad, contraste) | 🟡 A medias: XSS ✅, Esc/foco/aria en modales ✅, contraste modo oscuro ⚠️ por revisar |
 
 ## 2. Hecho
 
@@ -54,7 +54,7 @@ voluntarios** y descarga libre vía Edge Function.
   `cartRows`, `cartTitles`, `saveCart`, `loadCart`.
 - **Sitio.** `config.js` con `supabase.url` + `anonKey`; textos nuevos
   (`catalogoSub`, `catalogoNota`, `morralTitulo`, `botonDescargar`…); assets a
-  `?v=37`.
+  la versión vigente en `index.html` (los cambios de una sesión suben el número).
 - **Documentación** (`README`, `AGENTS`, `MANIFIESTO`, `LEEME`, `emailjs/`,
   `ESTRUCTURA`, este informe) actualizada al modelo gratuito.
 - **Reconciliación de git** (iteración anterior). Se fusionó el `origin/main`
@@ -70,7 +70,7 @@ voluntarios** y descarga libre vía Edge Function.
 | # | Pendiente | Detalle |
 | --- | --- | --- |
 | B1 | **Subir los archivos al bucket `libros`** | **Hecho:** 7 de 8 archivos subidos y verificados (URL firmada → descarga íntegra). `La República Argentina y el caso de Venezuela` (69 MB) excede el límite global de subida (50 MB, plan Free): queda solo como enlace a su fuente; se subiría si se eleva el límite del proyecto. Script: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… ./db/subir_libros.sh`. |
-| B2 | **Probar el envío de EmailJS** | Los IDs ya están en `config.js` (`MAIL_ON=true`). Falta verificar en el panel el *Allowlist* de orígenes y probar el correo de descarga gratuita (comprobar que el correo del solicitante entra en `solicitudes`). |
+| B2 | **Probar el envío de EmailJS** | `publicKey` renovada, pero `serviceId`/`templateCliente` conservan IDs de la cuenta anterior (`404 Account not found`): hay que reconectar el Service, recrear la plantilla de `emailjs/plantilla-cliente.html` y actualizar los IDs en `config.js`; luego verificar el *Allowlist* y probar el correo (que el solicitante entre en `solicitudes`). |
 | B3 | ~~Push a GitHub~~ | **Hecho:** `main` empujado a `origin/main` (commit `acbad34`). |
 | N1 | Reescribir historia (opcional) | Una edición descartada con copyright sigue en el historial (`b8e7945`); requiere force-push. |
 
@@ -96,5 +96,7 @@ voluntarios** y descarga libre vía Edge Function.
 1. **B1** → hecho (7/8 subidos y verificados); solo `La República Argentina y el caso de Venezuela` queda como enlace por el límite de tamaño.
 2. **B2** → verificar el *Allowlist* de EmailJS y probar el correo de descarga gratuita.
 3. **B3** → hecho (push a `origin/main`); activar GitHub Pages.
-4. **Fase 0** → saneado (escapado XSS en `draw()`, contraste en modo oscuro,
-   Esc/trampa de foco/etiquetas en modales).
+4. **Fase 0** → hecha la parte web (escapado XSS con `esc()`, Esc al cerrar,
+   trampa de foco/foco inicial y `role="dialog"`/`aria-modal` en los paneles;
+   Tope de aporte aplicado en código). **Pendiente:** revisar contraste en
+   modo oscuro con medición (WCAG AA) y ajustar variables si hace falta.

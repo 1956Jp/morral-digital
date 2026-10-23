@@ -42,7 +42,9 @@ const ETIQ=Object.assign({card:"Tarjeta",paypal:"PayPal",bank:"Pago Móvil",cryp
 const METODOS=((CFG.metodosPago&&CFG.metodosPago.length)?CFG.metodosPago:["bank","crypto"]).filter(k=>ETIQ[k]);
 // Aportes (donaciones): catálogo gratuito, aportes voluntarios para la tecnología.
 const APOR=Object.assign({titulo:"Aportes",intro:"El Morral Digital es gratuito y sin cercas. Si quieres, puedes dejar un aporte voluntario para sostener el desarrollo de la tecnología.",montoMin:1,montoMax:500,montos:[1,3,5,10]},CFG.aportes||{});
-let cart=[],cat="Todos",lastMethod="bank",orderCode="",rateCache=null,aporte=0;
+// Tope de cordura (RESULTADOS): el monto no se sale de [montoMin, montoMax].
+const clampAporte=v=>{const min=+APOR.montoMin||0,max=+APOR.montoMax||min;return Math.min(Math.max(+v||0,min),max||min||0)};
+let cart=[],cat="Todos",lastMethod="bank",orderCode="",rateCache=null,aporte=0,lastTrigger=null;
 const $=i=>document.getElementById(i),f=n=>"$"+n.toFixed(2);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const newOrder=()=>"MD-"+Math.random().toString(36).slice(2,8).toUpperCase();
@@ -109,7 +111,7 @@ return sendMail(MAIL.templateCliente,params)}
 // Formulario de descarga gratuita: pide el correo del solicitante.
 function freeBook(i){
 const b=B[i];if(!b)return;
-closeAll();$("pay").classList.add("show");
+closeAll();lastTrigger=document.activeElement;$("pay").classList.add("show");
 const abrir=b[7]?`<a class="btn ghost" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:8px" href="${esc(b[7])}" target="_blank" rel="noopener">Abrir el enlace ahora</a>`:"";
 $("pm").innerHTML=`<h2>${esc(b[0])}</h2><p class="note">${esc(b[1])} · ${esc(b[2])}</p><p>Te enviamos el enlace de descarga a tu correo.</p><input type="email" id="fe-em" placeholder="Tu correo"><button class="btn alt" style="width:100%" onclick="freeSend(${i})">Recibir el enlace por correo</button>${abrir}<div id="fe-msg"></div>`}
 async function freeSend(i){
@@ -131,8 +133,8 @@ msg.innerHTML=enviado?`<p class="note">Listo (ref. <b>${esc(code)}</b>). Enviamo
 // y se manda al solicitante una copia con el enlace de la fuente (campo 7).
 // Si la Edge Function falla, se cae al enlace de la fuente cuando exista.
 function descargar(i){
-const b=B[i];if(!b||!b[6]){if(b&&b[7])open(b[7]);return}
-closeAll();$("pay").classList.add("show");
+const b=B[i];if(!b||!b[6]){if(b&&b[7])openUrl(b[7]);return}
+closeAll();lastTrigger=document.activeElement;$("pay").classList.add("show");
 const src=b[7]?`<p class="note">También disponible en su fuente original: <a href="${esc(b[7])}" target="_blank" rel="noopener">abrir enlace</a>.</p>`:"";
 $("pm").innerHTML=`<h2>${esc(b[0])}</h2><p class="note">${esc(b[1])} · ${esc(b[2])}</p>
 <p>Descarga el archivo directamente. Si quieres, deja tu correo para recibir también el enlace de la fuente (opcional).</p>
@@ -144,7 +146,7 @@ const em=((inp&&inp.value)||"").trim();
 if(em&&!em.includes("@")){if(inp)inp.focus();if(msg)msg.innerHTML="<p class='note'>Ese correo no parece válido; corrige o déjalo vacío para descargar igual.</p>";return}
 if(msg)msg.innerHTML="<p class='note'>Preparando la descarga…</p>";
 if(!SB_FN_ENTREGAR){
-  if(b[7]){open(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}
+  if(b[7]){openUrl(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}
   else if(msg)msg.innerHTML="<p class='note'>La descarga directa no está configurada.</p>";
   return}
 let url="";
@@ -162,7 +164,7 @@ try{
     try{ const e=await r.json(); console.warn("entregar error",r.status,e); }catch(_){}
   }
 }catch(e){ console.warn("entregar fetch error",e); }
-if(!url){if(b[7]){open(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}else if(msg)msg.innerHTML="<p class='note'>No se pudo preparar la descarga. Inténtalo más tarde.</p>";return}
+if(!url){if(b[7]){openUrl(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}else if(msg)msg.innerHTML="<p class='note'>No se pudo preparar la descarga. Inténtalo más tarde.</p>";return}
 const a=document.createElement("a");a.href=url;a.download=b[6];a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
 let aviso="";
 if(em){
@@ -172,7 +174,7 @@ if(em){
   aviso=enviado?` Enviamos una copia con el enlace a <b>${esc(em)}</b> (ref. <b>${esc(code)}</b>).`:` Se registró tu solicitud (ref. <b>${esc(code)}</b>), pero no pudimos enviar el correo.`;
 }
 if(msg)msg.innerHTML=`<p class="note">Descarga iniciada.${aviso}</p>${b[7]?`<a class="btn ghost" style="display:block;width:100%;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:8px" href="${esc(b[7])}" target="_blank" rel="noopener">Ver en la fuente original</a>`:""}`}
-const open=u=>{const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()};
+const openUrl=u=>{const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()};
 // ==== Supabase: catálogo, reseñas y actividad por sección ====
 // Mismo estilo que getRate() (REST/PostgREST, sin librerías). Todo es
 // best-effort: si no hay config o la red falla, el sitio usa los datos
@@ -251,15 +253,30 @@ $("items").innerHTML=cart.length?cart.map((k,idx)=>{const r=rowOf(k);const i=B.i
 const d=r[6]?`<button class="btn gratis" onclick="descargar(${i})">Descargar</button>`:(r[7]?`<button class="btn gratis" onclick="freeBook(${i})">Leer gratis</button>`:"");
 return `<div class="item"><span>${esc(r[0])}</span><span class="row" style="gap:8px">${d} <a href="#" onclick="rmAt(${idx});return false">✕</a></span></div>`}).join(""):"<p class='sub'>Tu lista está vacía.</p>";
 saveCart()}
-function openCart(){closeAll();$("cart").classList.add("show")}
-function closeAll(){["cart","pay"].forEach(x=>$(x).classList.remove("show"))}
+function openCart(){closeAll();lastTrigger=document.activeElement;$("cart").classList.add("show");focusPanel("cart")}
+function closeAll(){const ae=document.activeElement,volvia=ae&&ae.closest&&ae.closest(".over");["cart","pay"].forEach(x=>$(x).classList.remove("show"));if(volvia||!ae||ae===document.body){const t=lastTrigger;if(t&&t.focus)try{t.focus()}catch(e){}}}
+// Fase 0 (accesibilidad): Esc cierra el modal y Tab queda atrapado en su panel.
+document.addEventListener("keydown",e=>{
+const vis=document.querySelector(".over.show");if(!vis)return;
+if(e.key==="Escape"){closeAll();return}
+if(e.key!=="Tab")return;
+const items=[...vis.querySelectorAll("button,input,a,select,textarea")].filter(x=>!x.disabled&&x.offsetParent!==null&&x.tabIndex>=0);
+if(!items.length){e.preventDefault();return}
+const first=items[0],last=items[items.length-1];
+const dentro=vis.contains(document.activeElement);
+if((e.shiftKey&&(document.activeElement===first||!dentro))){e.preventDefault();last.focus()}
+else if((!e.shiftKey&&(document.activeElement===last||!dentro))){e.preventDefault();first.focus()}
+});
+// Al abrir un modal, el foco entra al panel (botones/inputs). Si el panel
+// acaba de re-renderizarse y el foco queda fuera, Tab lo devuelve al entrar.
+function focusPanel(id){const vis=$(id);const pf=vis&&vis.querySelector("button,input,a[href]");if(pf)try{pf.focus({preventScroll:true})}catch(e){}}
 function checkout(){openAportes()}
 // ==== Aportes (donaciones voluntarias): el catálogo es gratuito ====
 // Reusa el panel de pago para recibir APORTES destinados a sostener el
 // desarrollo tecnológico. No hay pedido ni verificación: es un gesto voluntario.
-function aporteSet(v){aporte=+v||0;method(lastMethod)}
-function aporteInput(){const e=document.getElementById("ap-monto");if(!e)return;const v=+e.value;if(Number.isFinite(v)&&v>0)aporte=v;method(lastMethod)}
-function openAportes(){orderCode=orderCode||newOrder();if(!aporte||aporte<+APOR.montoMin)aporte=+APOR.montoMin||0;closeAll();$("pay").classList.add("show");method(METODOS[0])}
+function aporteSet(v){aporte=clampAporte(v);method(lastMethod)}
+function aporteInput(){const e=document.getElementById("ap-monto");if(!e)return;const v=+e.value;if(Number.isFinite(v)&&v>0)aporte=clampAporte(v);method(lastMethod)}
+function openAportes(){orderCode=orderCode||newOrder();if(!aporte||aporte<+APOR.montoMin)aporte=clampAporte(APOR.montoMin);closeAll();lastTrigger=document.activeElement;$("pay").classList.add("show");method(METODOS[0]);focusPanel("pay")}
 function method(m){if(!METODOS.includes(m))m=METODOS[0];lastMethod=m;const t=ETIQ;
 const quick=(APOR.montos||[]).map(v=>`<button type="button" class="chip ${aporte==v?"on":""}" onclick="aporteSet(${v})">$${v}</button>`).join("");
 const form={card:`<input placeholder="Nombre en la tarjeta"><input placeholder="Número de tarjeta" inputmode="numeric"><div class="row" style="gap:8px"><input placeholder="MM/AA"><input placeholder="CVC"></div><p class="note">Demo: no se procesa ningún cobro y estos campos no se envían a ningún servidor. Para aportar de verdad usa <b>Pago Móvil</b> o <b>Cripto</b>.</p>`,
@@ -285,7 +302,7 @@ ${QR_PM?`<img class="pm-qr" src="${QR_PM}" alt="QR de Pago Móvil" onerror="this
 <p class="note">Seguridad: nunca pedimos claves privadas, frases semilla ni códigos 2FA. Verifica el destinatario antes de aportar.</p>
 ${QR_CRYPTO?`<img class="pm-qr" src="${QR_CRYPTO}" alt="QR de Binance Pay" onerror="this.remove()">`:""}`}[m];
 $("pm").innerHTML=`<h2>${esc(APOR.titulo)} · ${f(total())} USD</h2><p class="note">${esc(APOR.intro)}</p>
-<div class="row" style="gap:8px;flex-wrap:wrap;margin:10px 0">${quick}<input id="ap-monto" type="number" min="${APOR.montoMin||0}" max="${APOR.montoMax||100000}" step="1" value="${aporte||""}" placeholder="Otro monto (USD)" style="max-width:160px"><button type="button" class="btn ghost" onclick="aporteInput()">Aplicar</button></div>
+<div class="row" style="gap:8px;flex-wrap:wrap;margin:10px 0">${quick}<input id="ap-monto" type="number" min="${APOR.montoMin||0}" max="${+APOR.montoMax||0}" step="1" value="${aporte||""}" placeholder="Otro monto (USD)" style="max-width:160px"><button type="button" class="btn ghost" onclick="aporteInput()">Aplicar</button></div>
 <div class="tabs">${METODOS.map(k=>`<button class="chip ${k==m?"on":""}" onclick="method('${k}')">${t[k]}</button>`).join("")}</div>
 <input type="email" id="em" placeholder="Tu correo (opcional, para agradecerte)">${form}
 <button class="btn alt" style="width:100%" onclick="done()">Ya aporté, enviar comprobante</button>
@@ -296,6 +313,7 @@ async function saveAporte(email){
 if(!SB_ON)return;
 try{await sbInsert("solicitudes",{email:String(email||""),book_title:"Aporte",source_url:"",code:orderCode})}catch(e){}}
 function done(){const raw=($("em")&&$("em").value)||"";const em=esc(raw.includes("@")?raw:"");
+const montoLive=document.getElementById("ap-monto");if(montoLive){const vv=+montoLive.value;if(Number.isFinite(vv)&&vv>0)aporte=clampAporte(vv)}
 const n=orderCode=orderCode||newOrder(),amt=total();
 saveAporte(raw).catch(()=>{});
 let wa;

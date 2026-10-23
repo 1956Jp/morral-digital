@@ -21,7 +21,6 @@ files=(
   ariel.pdf
   facundo.pdf
   ugarte-el-porvenir.pdf
-  drago-caso-venezuela.pdf
   noli-me-tangere.epub
   el-filibusterismo.epub
   imperialismo-petrolero-tomo-i.pdf

@@ -6,7 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet" referrerpolicy="no-referrer">
-<link rel="stylesheet" href="assets/css/styles.css?v=42"></head><body>
+<link rel="stylesheet" href="assets/css/styles.css?v=43"></head><body>
 <header><div class="wrap"><a class="logo" href="#" id="brand">★ El Morral <span>Digital</span></a>
 <nav><a id="nav-catalogo" href="#catalogo">Catálogo</a><a id="nav-resenas" href="#resenas">Reseñas</a><a id="nav-expansion" href="#expansion">Expansión</a>
 <button class="btn ghost" onclick="openAportes()">Aportes</button>
@@ -43,14 +43,14 @@
 
 <footer><div class="wrap" id="foot">★ El Morral Digital · Ideas libres para los pueblos · Obras de dominio público</div></footer>
 
-<div class="over" id="cart" onclick="if(event.target===this)closeAll()"><div class="panel">
+<div class="over" id="cart" onclick="if(event.target===this)closeAll()"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="morral-title">
 <div class="row"><h2 id="morral-title">Tu lista de descargas</h2><button class="btn ghost" onclick="closeAll()">Cerrar</button></div>
 <div id="items"></div>
 <button class="btn alt" style="width:100%" onclick="openAportes()">Hacer un aporte</button>
 <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeAll()">Seguir leyendo</button></div></div>
 
-<div class="over" id="pay" onclick="if(event.target===this)closeAll()"><div class="panel modal" id="pm"></div></div>
+<div class="over" id="pay" onclick="if(event.target===this)closeAll()"><div class="panel modal" id="pm" role="dialog" aria-modal="true" aria-label="Aportes voluntarios y descargas"></div></div>
 
-<script src="assets/js/config.js?v=42"></script>
-<script src="assets/js/data.js?v=42"></script>
-<script src="assets/js/app.js?v=42"></script></body></html>
+<script src="assets/js/config.js?v=43"></script>
+<script src="assets/js/data.js?v=43"></script>
+<script src="assets/js/app.js?v=43"></script></body></html>

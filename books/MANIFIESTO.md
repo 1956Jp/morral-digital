@@ -63,13 +63,14 @@ gratuito: no se vende nada.
 | El imperialismo petrolero y la Revolución Venezolana. Tomo II | Comisión Ideológica de Ruptura | — | — | Antiimperialista | `imperialismo-petrolero-tomo-ii.pdf` | www.petroleoydesarrollo.com/investigacion-publicaciones-obras — obra colectiva (dir. Ángel Márquez); NO dominio público (derechos en vigor, ~2037); ofrecido como **lectura gratuita** (archivo y enlace), con disposición a retirarlo del catálogo a solicitud fundada de sus derechohabientes | © Editorial Ruptura (1977) | 2026-10-18 |
 
 > El catálogo publica **26 títulos**, todos **gratuitos** (`precio = 0`, sin
-> venta): 8 con archivo (6 de **dominio público** verificados en el bucket
+> venta): 7 con archivo (5 de **dominio público** verificados en el bucket
 > privado `libros` — **Ariel**, **Facundo**, **El porvenir de la América
-> Latina** (Sempere, pre-1930), **La República Argentina y el caso de Venezuela**
-> (ed. 1903), **Noli me tángere** y **El Filibusterismo** (Gutenberg, notas de
+> Latina** (Sempere, pre-1930), **Noli me tángere** y **El Filibusterismo** (Gutenberg, notas de
 > Sempau †1909) — y 2 tomos de **El imperialismo petrolero** con © en vigor,
 > ofrecidos como lectura gratuita: se retiran del catálogo a solicitud de sus
-> derechohabientes) y 18 que son solo enlace a su fuente original. Con archivo
+> derechohabientes) y 19 que son solo enlace a su fuente original. **La
+> República Argentina y el caso de Venezuela** (Drago, ed. 1903) pasó a ser
+> solo enlace (ver su ficha arriba) y fuera del bucket. Con archivo
 > el botón es «Descargar»; solo enlace, «Leer gratis». Todo título **sin archivo
 > y sin fuente verificable** está retirado del catálogo (ver abajo) hasta que se
 > compruebe una edición de dominio público.

@@ -86,35 +86,34 @@ Los PDF/EPUB **no** se publican en el repo. Viven en un **bucket privado** `libr
 > Nota: los libros con `archivo` (bucket) y los de solo `fuente` (enlace externo) conviven en el catálogo; la ficha decide el botón según el campo 6 de `data.js`.
 
 ## Correos con EmailJS (opcional)
-En el flujo gratuito, al pedir el enlace de un libro de **solo fuente en línea** (`freeSend()`), el sitio envía al solicitante un correo con el **enlace directo al libro** y guarda su correo en `solicitudes` con una referencia `GR-XXXXXX` (para consultarla en el Table Editor). Los correos salen desde la cuenta conectada (la del administrador) con un `POST` JSON a `https://api.emailjs.com/api/v1.0/email/send`, **sin librerías**, igual que la tasa del BCV y Supabase. Si `publicKey`/`serviceId` están vacíos, se desactiva y el sitio funciona igual.
+En el flujo gratuito, al pedir el enlace de un libro de **solo fuente en línea** (`freeSend()`), el sitio envía al solicitante **un único correo** con el **enlace directo al libro** y guarda su correo en `solicitudes` con una referencia `GR-XXXXXX` (para consultarla en el Table Editor). En «Descargar» con bucket, el correo es opcional y va por el mismo camino (`descargarFile()` → `notifyFree`). Los correos salen desde la cuenta conectada (la del administrador) con un `POST` JSON a `https://api.emailjs.com/api/v1.0/email/send`, **sin librerías**, igual que la tasa del BCV y Supabase. Si `publicKey`/`serviceId` están vacíos, se desactiva y el sitio funciona igual. El aviso al administrador existió para el antiguo flujo de pedidos y **ya no se envía** (`plantilla-admin.html` queda como histórico).
 
 1. **Crea la cuenta y conecta el servicio**: en [dashboard.emailjs.com](https://dashboard.emailjs.com) añade un *Email Service* (Gmail/Outlook/SMTP…). Copia su **Service ID** (`service_xxx`).
-2. **Crea dos plantillas** (*Email Templates*): el cuerpo listo para pegar está en `emailjs/plantilla-cliente.html` y `emailjs/plantilla-admin.html` (ver `emailjs/README.md`).
+2. **Crea una plantilla** (*Email Templates*): el cuerpo listo para pegar está en `emailjs/plantilla-cliente.html` (ver `emailjs/README.md`).
    - **Al cliente** (`templateCliente`): en el campo **To Email** pon `{{email}}` (destinatario dinámico). Usa las variables de abajo. Si quieres HTML sin escapar, usa llaves triples (`{{{enlaces}}}`).
-   - **Al administrador** (`templateAdmin`): en **To Email** pon tu correo (o `{{admin_email}}`).
-3. **Rellena `emailjs` en `assets/js/config.js`**: `publicKey` (Public Key de la cuenta), `serviceId`, `templateCliente`, `templateAdmin`, `adminEmail` y `enviarEnlaces`.
-4. **Limita el origen**: en el panel de EmailJS activa el *Allowlist* (p. ej. `https://1956jp.github.io`, el dominio de Vercel y `http://localhost:8000`) para que solo tu sitio pueda usar la Public Key.
+3. **Rellena `emailjs` en `assets/js/config.js`**: `publicKey` (Public Key de la cuenta), `serviceId`, `templateCliente` y `adminEmail` (`templateAdmin`/`enviarEnlaces` quedan reservados sin uso).
+4. **Limita el origen**: en el panel de EmailJS activa el *Allowlist* (p. ej. `https://1956jp.github.io`, el dominio de Vercel y `http://localhost:8000`) para que solo tu sitio pueda usar la Public Key. Nota de diagnóstico: `404 Account not found` = cuenta/Service caídos (reconecta y actualiza los ID en `config.js`); `403` = origen sin permitir; `400` = Public Key inválida.
 
-Variables disponibles en las plantillas (todas las recibe cada correo):
+Variables que envía `notifyFree` (y qué recibe cada una):
 
 | Variable | Contenido |
 | --- | --- |
-| `{{email}}` / `{{client_email}}` | Correo del cliente (To Email del correo al cliente) |
-| `{{admin_email}}` | Correo del administrador |
-| `{{order_code}}` | Código del pedido (p. ej. `MD-AB12CD`) |
-| `{{metodo}}` | Método de pago (Tarjeta, PayPal, Pago Móvil, Cripto…) |
-| `{{items}}` | Lista de títulos separados por comas |
-| `{{total}}` / `{{moneda}}` | Importe (`$12.00`) y divisa (`USD`) |
-| `{{monto_bs}}` / `{{tasa_bs}}` | Monto en Bs y tasa BCV (solo Pago Móvil) |
-| `{{enlaces}}` | Enlaces a los libros: en descargas gratuitas, el enlace directo al libro |
-| `{{whatsapp}}` | Enlace `wa.me` para enviar el comprobante por WhatsApp |
+| `{{email}}` / `{{client_email}}` | Correo del solicitante (**To Email** de la plantilla) |
+| `{{admin_email}}` | Correo del administrador (de `config.js`) |
+| `{{order_code}}` | Referencia `GR-XXXXXX` de la solicitud |
+| `{{metodo}}` | Texto fijo «Descarga gratuita» |
+| `{{items}}` | Título del libro solicitado |
+| `{{total}}` / `{{moneda}}` | `$0.00` / `USD` (el catálogo es gratuito) |
+| `{{monto_bs}}` / `{{tasa_bs}}` | Vacíos (historial del flujo anterior; sin uso en el correo actual) |
+| `{{enlaces}}` | Enlace directo a la fuente del libro + enlace al sitio |
+| `{{whatsapp}}` | Enlace `wa.me` para comprar sobre el título por WhatsApp |
 
 > **Límite importante:** el sitio es estático. Los archivos viven en el bucket privado `libros` y se entregan con URLs firmadas por la Edge Function (descarga libre). EmailJS limita a **1 envío por segundo**.
 
 Seguridad: la **Public Key** es pública (va en el navegador); la protección es el *Allowlist* de orígenes. **Nunca** pongas en `config.js` la clave privada (`accessToken`). En Vercel, el `connect-src` de `vercel.json` ya incluye `https://api.emailjs.com`; en GitHub Pages no hay CSP que ajustar.
 
 ## Catálogo, reseñas y actividad con Supabase (opcional)
-Con el **mismo** `supabase` de `config.js` que los pedidos, el sitio puede sincronizar tres secciones. Si `url`/`anonKey` están vacíos, todo usa los datos locales (`data.js` y las reseñas de ejemplo) y el sitio funciona igual.
+Con el **mismo** `supabase` de `config.js` (el modelo de pedidos ya está retirado; ver `db/supabase_limpieza.sql`), el sitio puede sincronizar tres secciones. Si `url`/`anonKey` están vacíos, todo usa los datos locales (`data.js` y las reseñas de ejemplo) y el sitio funciona igual.
 
 1. **Ejecuta `db/supabase_secciones.sql`** en el SQL Editor. Crea:
    - **`books`** — el catálogo. Lectura **pública** de los títulos `active`; nadie desde el navegador puede escribir.
