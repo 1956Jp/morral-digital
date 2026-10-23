@@ -107,7 +107,11 @@ window.CFG = {
   // política RLS. NUNCA pongas aquí la `service_role` ni ninguna clave privada.
   supabase: {
     url: "https://uzqadthbjhhdhoqlnupn.supabase.co", // https://TU-PROYECTO.supabase.co
-    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6cWFkdGhiamhoZGhvcWxudXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDczNDksImV4cCI6MjEwNzcyMzM0OX0.nQNc279PijOU9Bvg5v7232VPaJ_Frb_Oh1l-1smfjIs" // clave anónima pública (NO la service_role)
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6cWFkdGhiamhoZGhvcWxudXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDczNDksImV4cCI6MjEwNzcyMzM0OX0.nQNc279PijOU9Bvg5v7232VPaJ_Frb_Oh1l-1smfjIs", // clave anónima pública (NO la service_role)
+    // URLs explícitas para funciones/servicios (opcional). Úsalo si cambias proyecto o quieres apuntar a otro endpoint.
+    functions: {
+      entregar: "" // p.ej. "https://uzqadthbjhhdhoqlnupn.supabase.co/functions/v1/entregar"
+    }
   },
 
   // ------------------------------------------------ Correo (EmailJS)

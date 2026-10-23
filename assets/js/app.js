@@ -30,7 +30,7 @@ const SB_ON=!!(SB_URL&&SB_KEY);
 // Entrega gratuita: Edge Function que devuelve URLs firmadas temporales de los
 // archivos del bucket privado `libros` (ver supabase/functions/entregar). Ya no
 // exige pago: todo el catálogo es gratuito y de dominio público.
-const SB_FN_ENTREGAR=SB_URL?`${SB_URL}/functions/v1/entregar`:"";
+const SB_FN_ENTREGAR=(SB.functions&&SB.functions.entregar)?String(SB.functions.entregar).replace(/\/+$/,""):(SB_URL?`${SB_URL}/functions/v1/entregar`:"");
 // EmailJS: correo opcional de descarga gratuita (notifyFree: enlace a la fuente
 // y ref. GR). REST/JSON sin librerías, como getRate(). La publicKey es
 // PÚBLICA; la protección es el «Allowlist» de orígenes en el panel de EmailJS.
@@ -148,7 +148,20 @@ if(!SB_FN_ENTREGAR){
   else if(msg)msg.innerHTML="<p class='note'>La descarga directa no está configurada.</p>";
   return}
 let url="";
-try{const r=await fetch(SB_FN_ENTREGAR,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({archivo:b[6]})});const data=await r.json();url=(data&&data.url)||""}catch(e){}
+try{
+  const headers={"Content-Type":"application/json"};
+  if(SB_KEY){ headers.apikey=SB_KEY; headers.Authorization=`Bearer ${SB_KEY}`; }
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),10000);
+  const r=await fetch(SB_FN_ENTREGAR,{method:"POST",headers,body:JSON.stringify({archivo:b[6]}),signal:ctrl.signal});
+  clearTimeout(t);
+  if(r.ok){
+    const data=await r.json().catch(()=>({}));
+    url=(data&&data.url)||"";
+  }else{
+    try{ const e=await r.json(); console.warn("entregar error",r.status,e); }catch(_){}
+  }
+}catch(e){ console.warn("entregar fetch error",e); }
 if(!url){if(b[7]){open(b[7]);if(msg)msg.innerHTML="<p class='note'>Descarga por la fuente original.</p>"}else if(msg)msg.innerHTML="<p class='note'>No se pudo preparar la descarga. Inténtalo más tarde.</p>";return}
 const a=document.createElement("a");a.href=url;a.download=b[6];a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
 let aviso="";
