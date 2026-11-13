@@ -1,0 +1,30 @@
+# Keepalive: mantiene despierto el proyecto Free de Supabase (se pausa tras
+# ~7 días sin peticiones de API). Un ping diario de ~1 KB basta: el consumo
+# real del sitio es ínfimo (ver Panel de uso del dashboard).
+# La anonKey es pública por diseño (va en assets/js/config.js y el navegador);
+# la protección del backend es la RLS. NUNCA poner aquí la service_role.
+name: keepalive
+
+on:
+  schedule:
+    - cron: "37 5 * * *" # diario 05:37 UTC (fuera de las horas punta de Actions)
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping al REST de Supabase (cuenta como actividad)
+        run: |
+          URL="https://uzqadthbjhhdhoqlnupn.supabase.co"
+          KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6cWFkdGhiamhoZGhvcWxudXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDczNDksImV4cCI6MjEwNzcyMzM0OX0.nQNc279PijOU9Bvg5v7232VPaJ_Frb_Oh1l-1smfjIs"
+          code=$(curl -sS -o /tmp/ping.out -w "%{http_code}" --max-time 20 \
+            "$URL/rest/v1/books?select=title&limit=1" \
+            -H "apikey: $KEY" || echo 000)
+          if [ "$code" = "200" ]; then
+            echo "Supabase vivo (200). Respuesta: $(head -c 200 /tmp/ping.out)"
+          else
+            echo "Sin respuesta (HTTP $code): proyecto pausado/eliminado. Restaurar desde el dashboard."
+          fi
